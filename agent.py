@@ -11,11 +11,11 @@ This file intentionally omits core implementations and replaces them with
 clear specifications and TODOs.
 """
 
-import time
 from typing import List, Callable, Dict, Any
 
 from response_parser import ResponseParser
 from llm import LLM, OpenAIModel
+import inspect
 
 class ReactAgent:
     """
@@ -122,6 +122,32 @@ class ReactAgent:
         """
         # TODO(student): Implement the Reason-Act loop per the assignment, including error handling.
         raise NotImplementedError("run must be implemented by the student")
+
+    def message_id_to_context(self, message_id: int) -> str:
+        """
+        Helper function to convert a message id to a context string.
+        """
+        message = self.id_to_message[message_id]
+        header = f'----------------------------\n|MESSAGE(role="{message["role"]}", id={message["unique_id"]})|\n'
+        content = message["content"]
+        if message["role"] == "system":
+            tool_descriptions = []
+            for tool in self.function_map.values():
+                signature = inspect.signature(tool)
+                docstring = inspect.getdoc(tool)
+                tool_description = f"Function: {tool.__name__}{signature}\n{docstring}\n"
+                tool_descriptions.append(tool_description)
+
+            tool_descriptions = "\n".join(tool_descriptions)
+            return (
+                f"{header}{content}\n"
+                f"--- AVAILABLE TOOLS ---\n{tool_descriptions}\n\n"
+                f"--- RESPONSE FORMAT ---\n{self.parser.response_format}\n"
+            )
+        elif message["role"] == "instructor":
+            return f"{header}YOU MUST FOLLOW THE FOLLOWING INSTRUCTIONS AT ANY COST. OTHERWISE, YOU WILL BE DECOMISSIONED.\n{content}\n"
+        else:
+            return f"{header}{content}\n"
 
 def main():
     from envs import DumbEnvironment

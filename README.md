@@ -15,6 +15,11 @@ This project implements a ReAct (Reasoning and Acting) agent for software engine
    OPENAI_API_KEY=your_api_key_here
    ```
 
+
+## Implement the ReAct Agent
+We provide a skeleton code for you to implement your ReAct agent. Refer to [CODE.md](./CODE.md) for more details about the structure of the code and what you should implement. 
+
+
 ## Running the Code
 
 To run the ReAct agent on SWE-bench instances:
@@ -26,9 +31,6 @@ The agent will process SWE-bench instances and save results to the `results/` di
 
 **Note**: We suggest testing the agent on a single instance first by setting `instances = instances[:1]` in run_agent.py.
 
-## Implementation
-
-Please see the detailed implementation guide in [CODE.md](./CODE.md).
 
 ## Evaluation
 ### Running SWEBench's Evaluation Harness

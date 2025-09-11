@@ -1,6 +1,6 @@
 ## CS294 HW1 Starter: Minimal ReAct Agent Scaffold
 
-This `starter/` folder contains a scaffold you must complete to build a minimal ReAct agent for SWE-Bench.
+This folder contains a scaffold you must complete to build a minimal ReAct agent for SWE-Bench.
 
 You will:
 - Maintain a message history tree (system → user → instruction, plus subsequent nodes)
