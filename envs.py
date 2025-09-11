@@ -50,7 +50,7 @@ class SWEEnvironment:
         except Exception as e:
             return f"{result}\n\nError running git commands: {e}"
     
-    # -------------------- TODO: add more functions here if you want --------------------
+    # -------------------- TODO(student): add more functions here if you want --------------------
     def replace_in_file(self, file_path: str, from_line: int, to_line: int, content: str) -> str:
         """
         [Optional] Replace the content of the file from the given line to the given line with the given content
