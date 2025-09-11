@@ -15,9 +15,7 @@ import time
 from typing import List, Callable, Dict, Any
 
 from response_parser import ResponseParser
-from llm import LLM
-from utils import SWEEnvironment
-from utils import SWEEnvironment
+from llm import LLM, OpenAIModel
 
 class ReactAgent:
     """
@@ -28,11 +26,10 @@ class ReactAgent:
     - Runs a Reason-Act loop until `finish` is called or MAX_STEPS is reached
     """
 
-    def __init__(self, name: str, parser: ResponseParser, llm: LLM, env: SWEEnvironment):
+    def __init__(self, name: str, parser: ResponseParser, llm: LLM):
         self.name: str = name
         self.parser = parser
         self.llm = llm
-        self.env = env
 
         # Message tree storage
         self.id_to_message: List[Dict[str, Any]] = []
@@ -42,29 +39,16 @@ class ReactAgent:
         # Registered tools
         self.function_map: Dict[str, Callable] = {}
 
-        # Create required root nodes
-        # TODO(student): The root must be a system node with content:
-        # "You are a Smart ReAct agent." plus tool list and response format.
-        # Also create a user node (task) and an instruction node as specified in the assignment.
-        raise NotImplementedError("Initialize system/user/instruction nodes per the spec")
-      
-        # TODO(student): Initialize with a list of functions 
-        self.add_functions([self.run_bash_cmd])
+        # Set up the initial structure of the history
+        # Create required root nodes and a user node (task) and an instruction node.
+        self.system_message_id = self.add_message("system", "You are a Smart ReAct agent.")
+        self.user_message_id = self.add_message("user", "")
+        self.instructions_message_id = self.add_message("instructor", "")
+        
+        # NOTE: mandatory finish function that terminates the agent
         self.add_functions([self.finish])
-        # ....
-    
 
-    def add_functions(self, tools: List[Callable]):
-        """
-        Add callable tools to the agent's function map.
-
-        The system prompt must include tool descriptions that cover:
-        - The signature of each tool
-        - The docstring of each tool
-        """
-        # TODO(student): Register tools and construct tool descriptions for the system prompt.
-        raise NotImplementedError("add_functions must be implemented by the student")
-
+    # -------------------- MESSAGE TREE --------------------
     def add_message(self, role: str, content: str) -> int:
         """
         Create a new message and add it to the tree.
@@ -88,17 +72,17 @@ class ReactAgent:
         raise NotImplementedError("get_context must be implemented by the student")
 
     # -------------------- REQUIRED TOOLS --------------------
-    def run_bash_cmd(self, command: str):
-        """Run the command in a bash shell and return the output or throw a ValueError exception if the process returns non-zero exit code
-
-        Args;
-            command (str): the shell command to run
-
-        Returns:
-            The output of running the shell command
+    def add_functions(self, tools: List[Callable]):
         """
-        return self.env.execute(command)
+        Add callable tools to the agent's function map.
 
+        The system prompt must include tool descriptions that cover:
+        - The signature of each tool
+        - The docstring of each tool
+        """
+        # TODO(student): Register tools and construct tool descriptions for the system prompt.
+        raise NotImplementedError("add_functions must be implemented by the student")
+    
     def finish(self, result: str):
         """The agent must call this function with the final result when it has solved the given task. The function calls "git add -A and git diff --cached" to generate a patch and returns the patch as submission.
 
@@ -108,14 +92,7 @@ class ReactAgent:
         Returns:
             The result passed as an argument.  The result is then returned by the agent's run method.
         """
-        try:
-            patch_output = self.env.execute("git add -A && git diff --cached")
-            if patch_output.strip():
-                return patch_output
-            else:
-                return f"{result}\n\nNo changes detected to generate a patch."
-        except Exception as e:
-            return f"{result}\n\nError running git commands: {e}"
+        return result 
 
     def add_instructions_and_backtrack(self, instructions: str, at_message_id: int):
         """
@@ -146,7 +123,17 @@ class ReactAgent:
         # TODO(student): Implement the Reason-Act loop per the assignment, including error handling.
         raise NotImplementedError("run must be implemented by the student")
 
+def main():
+    from envs import DumbEnvironment
+    llm = OpenAIModel("----END_FUNCTION_CALL----", "gpt-4o-mini")
+    parser = ResponseParser()
+
+    env = DumbEnvironment()
+    dumb_agent = ReactAgent("dumb-agent", parser, llm)
+    dumb_agent.add_functions([env.run_bash_cmd])
+    result = dumb_agent.run("Show the contents of all files in the current directory.", max_steps=10)
+    print(result)
 
 if __name__ == "__main__":
     # Optional: students can add their own quick manual test here.
-    pass
+    main()

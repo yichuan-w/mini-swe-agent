@@ -5,7 +5,8 @@ This `starter/` folder contains a scaffold you must complete to build a minimal 
 You will:
 - Maintain a message history tree (system → user → instruction, plus subsequent nodes)
 - Implement a textual function-call protocol (no JSON/XML) and parse it with rfind
-- Add tools: `run_bash_cmd`, `finish`, `add_instructions_and_backtrack`
+- Add tools (inside the agent): `finish` (implemented), `add_instructions_and_backtrack`
+- Add tools (inside the environment): `run_bash_cmd` (implemented), and more you need to add 
 - Run on SWE-Bench verified subset; report baseline and improved accuracy
 
 ### Entry point 
@@ -13,13 +14,14 @@ The entry point to the code is `run_agent.py`. It wires up the model, parser, ag
 You don't need to modify this code. 
 
 ### Files to complete
-- `agent.py` — Implement the ReAct agent, message tree, tools, and the main loop
+- `agent.py` — Implement main logic of ReAct agent (e.g., message tree, tools, and main loop)
 - `llm.py` — Implement `OpenAIModel` (or your backend) with `generate(prompt)`
+- `env.py` - Implement additional functions to run inside the environment 
 - `response_parser.py` — Implement `ResponseParser.parse` using rfind
 
 ### Message history tree (required)
 Each message is a dict with:
-- `role`: "system" | "user" | "assistant" | "tool" | "instructor" (instruction node)
+- `role`: "system" | "user" | "assistant" | "tool" ...
 - `content`: string (can be Markdown)
 - `timestamp`: int (creation time)
 - `unique_id`: int counter starting at 1 (or 0), unique per message
@@ -54,7 +56,7 @@ Parse using `str.rfind` to avoid issues with earlier markers.
 - Backend model: GPT-5 mini (medium reasoning)
 - `MAX_STEPS` must be capped at 100
 - Baseline: report accuracy without `add_instructions_and_backtrack`
-- Improved: report accuracy with `add_instructions_and_backtrack` and any custom tools
+- Improved: report accuracy with `add_instructions_and_backtrack` and any more custom tools
 
 ### Setup
 1) Install dependencies

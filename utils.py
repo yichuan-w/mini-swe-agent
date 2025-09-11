@@ -97,38 +97,3 @@ def save_traj(
     path.write_text(json.dumps(data, indent=2))
     if print_path:
         print(f"Saved trajectory to '{path}'")
-
-class LimitsExceeded(Exception):
-    """Raised when the agent has reached its step limit."""
-
-
-class SWEEnvironment:
-    """
-    Minimal interface to the SWEBench execution environment.
-
-    Students may use their own wrapper. The environment must expose:
-    - execute(command: str) -> str: Run a shell command and return stdout, or raise ValueError on failure
-    """
-
-    def __init__(self, instance: dict):
-        self.env = get_sb_environment(instance)
-
-    def execute(self, command: str) -> str:
-        """
-        Run the command in a bash shell and return the output or throw a ValueError
-        if the process returns non-zero exit code.
-
-        Args;
-            command (str): the shell command to run
-
-        Returns:
-            The output of running the shell command
-        """
-        try:
-            output = self.env.execute(command)
-        except subprocess.TimeoutExpired as e:
-            output = e.output.decode("utf-8", errors="replace") if e.output else ""
-            raise ValueError(output)
-        except TimeoutError:
-            raise ValueError("TimeoutError")
-        return output

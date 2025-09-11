@@ -17,7 +17,7 @@ DATASET_MAPPING = {
 from agent import ReactAgent
 from llm import OpenAIModel
 from response_parser import ResponseParser
-from utils import SWEEnvironment
+from envs import SWEEnvironment, DumbEnvironment
 
 def process_instance(
     instance: dict,
@@ -46,9 +46,15 @@ def process_instance(
         # Initialize the environment
         env = SWEEnvironment(instance)
         # Initialize the agent
-        agent = ReactAgent("swe-agent", parser, llm, env)
+        agent = ReactAgent("swe-agent", parser, llm)
         # Run the agent
-        result = agent.run(task, max_steps) 
+        output = agent.run(task, max_steps) 
+        
+        # TODO(student): Add more functions here
+        # agent.add_functions([env.run_bash_cmd, env.replace_in_file, env.show_file, ...])
+        
+        # Generate patch for SWE-Bench
+        result = env.generate_patch(output)
         
     except Exception as e:
         print(f"Error processing instance {instance_id}: {e}")
