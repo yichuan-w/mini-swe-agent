@@ -21,7 +21,7 @@ You don't need to modify this code.
 
 ### Message history tree (required)
 Each message is a dict with:
-- `role`: "system" | "user" | "assistant" | "tool" ...
+- `role`: "system" | "user" | "assistant" | "tool" | "instructor" ...
 - `content`: string (can be Markdown)
 - `timestamp`: int (creation time)
 - `unique_id`: int counter starting at 1 (or 0), unique per message
