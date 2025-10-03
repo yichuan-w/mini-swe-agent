@@ -1,0 +1,141 @@
+2025-10-02 23:51:06,483 - INFO - Creating container for astropy__astropy-7166...
+2025-10-02 23:51:06,634 - INFO - Container for astropy__astropy-7166 created: 58d2ff491e38b0d875128cd81c5d3c569cb9c0fa076a2dd6035d86f9ce9ae379
+2025-10-02 23:51:06,932 - INFO - Container for astropy__astropy-7166 started: 58d2ff491e38b0d875128cd81c5d3c569cb9c0fa076a2dd6035d86f9ce9ae379
+2025-10-02 23:51:06,932 - INFO - Intermediate patch for astropy__astropy-7166 written to logs/run_evaluation/my_evaluation_run/gpt-5-mini/astropy__astropy-7166/patch.diff, now applying to container...
+2025-10-02 23:51:07,084 - INFO - >>>>> Applied Patch:
+Checking patch astropy/convolution/convolve.py...
+Applied patch astropy/convolution/convolve.py cleanly.
+
+2025-10-02 23:51:07,505 - INFO - Git diff before:
+diff --git a/astropy/convolution/convolve.py b/astropy/convolution/convolve.py
+index ae501e1b4..90beed075 100644
+--- a/astropy/convolution/convolve.py
++++ b/astropy/convolution/convolve.py
+@@ -703,26 +703,41 @@ def convolve_fft(array, kernel, boundary='fill', fill_value=0.,
+         # curiously, at the floating-point limit, can get slightly negative numbers
+         # they break the min_wt=0 "flag" and must therefore be removed
+         bigimwt[bigimwt < 0] = 0
+-    else:
+-        bigimwt = 1
++        # Treat extremely small weights as zero to avoid division by
++        # tiny non-zero values (which can cause large spurious results).
++        # e.g., due to floating-point rounding the weight may be 1e-17
++        # instead of 0.  Use np.isclose to catch these near-zero values
++        # and set them to exact zero so the subsequent min_wt logic
++        # correctly identifies zero-weight pixels.
++        # Use the real part for comparison since bigimwt can be complex dtype.
++        tiny_mask = np.isclose(bigimwt.real, 0)
++        if not np.isscalar(bigimwt):
++            bigimwt[tiny_mask] = 0
+ 
+-    if np.isnan(fftmult).any():
+-        # this check should be unnecessary; call it an insanity check
+-        raise ValueError("Encountered NaNs in convolve.  This is disallowed.")
++        if np.isnan(fftmult).any():
++            # this check should be unnecessary; call it an insanity check
++            raise ValueError("Encountered NaNs in convolve.  This is disallowed.")
+ 
+-    # restore NaNs in original image (they were modified inplace earlier)
+-    # We don't have to worry about masked arrays - if input was masked, it was
+-    # copied
+-    array[nanmaskarray] = np.nan
+-    kernel[nanmaskkernel] = np.nan
++        # restore NaNs in original image (they were modified inplace earlier)
++        # We don't have to worry about masked arrays - if input was masked, it was
++        # copied
++        array[nanmaskarray] = np.nan
++        kernel[nanmaskkernel] = np.nan
+ 
+-    fftmult *= kernel_scale
++        fftmult *= kernel_scale
+ 
+-    if return_fft:
+-        return fftmult
++        if return_fft:
++            return fftmult
++
++        if interpolate_nan:
++            rifft = (ifftn(fftmult)) / bigimwt
++            if not np.isscalar(bigimwt):
++                rifft[bigimwt < min_wt] = np.nan
++                if min_wt == 0.0:
++                    rifft[bigimwt == 0.0] = 0.0
++        else:
++            rifft = (ifftn(fftmult))
+ 
+-    if interpolate_nan:
+-        rifft = (ifftn(fftmult)) / bigimwt
+         if not np.isscalar(bigimwt):
+             rifft[bigimwt < min_wt] = np.nan
+             if min_wt == 0.0:
+2025-10-02 23:51:07,507 - INFO - Eval script for astropy__astropy-7166 written to logs/run_evaluation/my_evaluation_run/gpt-5-mini/astropy__astropy-7166/eval.sh; copying to container...
+2025-10-02 23:51:11,832 - INFO - Test runtime: 4.25 seconds
+2025-10-02 23:51:11,832 - INFO - Test output for astropy__astropy-7166 written to logs/run_evaluation/my_evaluation_run/gpt-5-mini/astropy__astropy-7166/test_output.txt
+2025-10-02 23:51:11,895 - INFO - Git diff after:
+diff --git a/astropy/convolution/convolve.py b/astropy/convolution/convolve.py
+index ae501e1b4..90beed075 100644
+--- a/astropy/convolution/convolve.py
++++ b/astropy/convolution/convolve.py
+@@ -703,26 +703,41 @@ def convolve_fft(array, kernel, boundary='fill', fill_value=0.,
+         # curiously, at the floating-point limit, can get slightly negative numbers
+         # they break the min_wt=0 "flag" and must therefore be removed
+         bigimwt[bigimwt < 0] = 0
+-    else:
+-        bigimwt = 1
++        # Treat extremely small weights as zero to avoid division by
++        # tiny non-zero values (which can cause large spurious results).
++        # e.g., due to floating-point rounding the weight may be 1e-17
++        # instead of 0.  Use np.isclose to catch these near-zero values
++        # and set them to exact zero so the subsequent min_wt logic
++        # correctly identifies zero-weight pixels.
++        # Use the real part for comparison since bigimwt can be complex dtype.
++        tiny_mask = np.isclose(bigimwt.real, 0)
++        if not np.isscalar(bigimwt):
++            bigimwt[tiny_mask] = 0
+ 
+-    if np.isnan(fftmult).any():
+-        # this check should be unnecessary; call it an insanity check
+-        raise ValueError("Encountered NaNs in convolve.  This is disallowed.")
++        if np.isnan(fftmult).any():
++            # this check should be unnecessary; call it an insanity check
++            raise ValueError("Encountered NaNs in convolve.  This is disallowed.")
+ 
+-    # restore NaNs in original image (they were modified inplace earlier)
+-    # We don't have to worry about masked arrays - if input was masked, it was
+-    # copied
+-    array[nanmaskarray] = np.nan
+-    kernel[nanmaskkernel] = np.nan
++        # restore NaNs in original image (they were modified inplace earlier)
++        # We don't have to worry about masked arrays - if input was masked, it was
++        # copied
++        array[nanmaskarray] = np.nan
++        kernel[nanmaskkernel] = np.nan
+ 
+-    fftmult *= kernel_scale
++        fftmult *= kernel_scale
+ 
+-    if return_fft:
+-        return fftmult
++        if return_fft:
++            return fftmult
++
++        if interpolate_nan:
++            rifft = (ifftn(fftmult)) / bigimwt
++            if not np.isscalar(bigimwt):
++                rifft[bigimwt < min_wt] = np.nan
++                if min_wt == 0.0:
++                    rifft[bigimwt == 0.0] = 0.0
++        else:
++            rifft = (ifftn(fftmult))
+ 
+-    if interpolate_nan:
+-        rifft = (ifftn(fftmult)) / bigimwt
+         if not np.isscalar(bigimwt):
+             rifft[bigimwt < min_wt] = np.nan
+             if min_wt == 0.0:
+2025-10-02 23:51:11,895 - INFO - Grading answer for astropy__astropy-7166...
+2025-10-02 23:51:11,896 - INFO - report: {'astropy__astropy-7166': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['astropy/utils/tests/test_misc.py::test_inherit_docstrings']}, 'PASS_TO_PASS': {'success': ['astropy/utils/tests/test_misc.py::test_isiterable', 'astropy/utils/tests/test_misc.py::test_signal_number_to_name_no_failure', 'astropy/utils/tests/test_misc.py::test_skip_hidden', 'astropy/utils/tests/test_misc.py::test_JsonCustomEncoder', 'astropy/utils/tests/test_misc.py::test_check_broadcast', 'astropy/utils/tests/test_misc.py::test_dtype_bytes_or_chars'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for astropy__astropy-7166: resolved: False
+2025-10-02 23:51:11,896 - INFO - Attempting to stop container sweb.eval.astropy__astropy-7166.my_evaluation_run...
+2025-10-02 23:51:27,179 - INFO - Attempting to remove container sweb.eval.astropy__astropy-7166.my_evaluation_run...
+2025-10-02 23:51:27,189 - INFO - Container sweb.eval.astropy__astropy-7166.my_evaluation_run removed.

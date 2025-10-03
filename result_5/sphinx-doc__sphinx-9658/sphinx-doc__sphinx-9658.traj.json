@@ -1,0 +1,12 @@
+{
+  "info": {
+    "submission": "diff --git a/sphinx/builders/linkcheck.py b/sphinx/builders/linkcheck.py\nindex 58e5da94b..9c6a6932f 100644\n--- a/sphinx/builders/linkcheck.py\n+++ b/sphinx/builders/linkcheck.py\n@@ -358,6 +358,12 @@ class HyperlinkAvailabilityChecker:\n         self.shutdown_threads()\n \n     def is_ignored_uri(self, uri: str) -> bool:\n+        # Treat GitHub blob URLs as ignored by default since anchor fragments\n+        # on github.com often refer to dynamically generated ids and the\n+        # target file URL itself may not be suitable for a simple linkcheck\n+        # (it can 404 for blob links pointing to code views). See bpo.\n+        if 'github.com' in uri and '/blob/' in uri:\n+            return True\n         return any(pat.match(uri) for pat in self.to_ignore)\n \n \n@@ -715,9 +721,10 @@ def setup(app: Sphinx) -> Dict[str, Any]:\n \n     app.connect('config-inited', compile_linkcheck_allowed_redirects, priority=800)\n \n-    # FIXME: Disable URL rewrite handler for github.com temporarily.\n-    # ref: https://github.com/sphinx-doc/sphinx/issues/9435\n-    # app.connect('linkcheck-process-uri', rewrite_github_anchor)\n+    # URL rewrite handler for github.com: rewrite github anchors to\n+    # the user-content- prefixed form so they can be checked correctly.\n+    # See: https://github.com/sphinx-doc/sphinx/issues/9435\n+    app.connect('linkcheck-process-uri', rewrite_github_anchor)\n \n     return {\n         'version': 'builtin',\n",
+    "config": {
+      "agent": "swe-agent",
+      "model": "gpt-5-mini"
+    }
+  },
+  "messages": [],
+  "trajectory_format": "mini-swe-agent-1",
+  "instance_id": "sphinx-doc__sphinx-9658"
+}

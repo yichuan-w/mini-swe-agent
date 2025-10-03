@@ -1,0 +1,61 @@
+diff --git a/astropy/convolution/convolve.py b/astropy/convolution/convolve.py
+index ae501e1b4..90beed075 100644
+--- a/astropy/convolution/convolve.py
++++ b/astropy/convolution/convolve.py
+@@ -703,26 +703,41 @@ def convolve_fft(array, kernel, boundary='fill', fill_value=0.,
+         # curiously, at the floating-point limit, can get slightly negative numbers
+         # they break the min_wt=0 "flag" and must therefore be removed
+         bigimwt[bigimwt < 0] = 0
+-    else:
+-        bigimwt = 1
++        # Treat extremely small weights as zero to avoid division by
++        # tiny non-zero values (which can cause large spurious results).
++        # e.g., due to floating-point rounding the weight may be 1e-17
++        # instead of 0.  Use np.isclose to catch these near-zero values
++        # and set them to exact zero so the subsequent min_wt logic
++        # correctly identifies zero-weight pixels.
++        # Use the real part for comparison since bigimwt can be complex dtype.
++        tiny_mask = np.isclose(bigimwt.real, 0)
++        if not np.isscalar(bigimwt):
++            bigimwt[tiny_mask] = 0
+ 
+-    if np.isnan(fftmult).any():
+-        # this check should be unnecessary; call it an insanity check
+-        raise ValueError("Encountered NaNs in convolve.  This is disallowed.")
++        if np.isnan(fftmult).any():
++            # this check should be unnecessary; call it an insanity check
++            raise ValueError("Encountered NaNs in convolve.  This is disallowed.")
+ 
+-    # restore NaNs in original image (they were modified inplace earlier)
+-    # We don't have to worry about masked arrays - if input was masked, it was
+-    # copied
+-    array[nanmaskarray] = np.nan
+-    kernel[nanmaskkernel] = np.nan
++        # restore NaNs in original image (they were modified inplace earlier)
++        # We don't have to worry about masked arrays - if input was masked, it was
++        # copied
++        array[nanmaskarray] = np.nan
++        kernel[nanmaskkernel] = np.nan
+ 
+-    fftmult *= kernel_scale
++        fftmult *= kernel_scale
+ 
+-    if return_fft:
+-        return fftmult
++        if return_fft:
++            return fftmult
++
++        if interpolate_nan:
++            rifft = (ifftn(fftmult)) / bigimwt
++            if not np.isscalar(bigimwt):
++                rifft[bigimwt < min_wt] = np.nan
++                if min_wt == 0.0:
++                    rifft[bigimwt == 0.0] = 0.0
++        else:
++            rifft = (ifftn(fftmult))
+ 
+-    if interpolate_nan:
+-        rifft = (ifftn(fftmult)) / bigimwt
+         if not np.isscalar(bigimwt):
+             rifft[bigimwt < min_wt] = np.nan
+             if min_wt == 0.0:

@@ -1,0 +1,12 @@
+{
+  "info": {
+    "submission": "diff --git a/test_requests.py b/test_requests.py\nindex 3d7cdaa..6b33309 100755\n--- a/test_requests.py\n+++ b/test_requests.py\n@@ -384,8 +384,10 @@ class RequestsTestCase(unittest.TestCase):\n     def test_conflicting_post_params(self):\n         url = httpbin('post')\n         with open('requirements.txt') as f:\n-            pytest.raises(ValueError, \"requests.post(url, data='[{\\\"some\\\": \\\"data\\\"}]', files={'some': f})\")\n-            pytest.raises(ValueError, \"requests.post(url, data=u'[{\\\"some\\\": \\\"data\\\"}]', files={'some': f})\")\n+            with pytest.raises(ValueError):\n+                requests.post(url, data='[{\"some\": \"data\"}]', files={'some': f})\n+            with pytest.raises(ValueError):\n+                requests.post(url, data=u'[{\"some\": \"data\"}]', files={'some': f})\n \n     def test_request_ok_set(self):\n         r = requests.get(httpbin('status', '404'))\n",
+    "config": {
+      "agent": "swe-agent",
+      "model": "gpt-5-mini"
+    }
+  },
+  "messages": [],
+  "trajectory_format": "mini-swe-agent-1",
+  "instance_id": "psf__requests-1921"
+}

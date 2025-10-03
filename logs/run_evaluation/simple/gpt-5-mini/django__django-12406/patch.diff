@@ -1,0 +1,40 @@
+diff --git a/django/forms/models.py b/django/forms/models.py
+index dafc11f995..aa0c8a2f2c 100644
+--- a/django/forms/models.py
++++ b/django/forms/models.py
+@@ -171,6 +171,35 @@ def fields_for_model(model, fields=None, exclude=None, widgets=None,
+             kwargs['form_class'] = field_classes[f.name]
+ 
+         if formfield_callback is None:
++            # If a relation field is rendered with a RadioSelect widget and the
++            # model field does not allow blank, don't provide an empty_label
++            # (the "---------" choice). Radios have an inherent unfilled
++            # state, so an explicit empty choice is confusing for required
++            # foreign keys.
++            widget = kwargs.get('widget')
++            try:
++                from django.forms import RadioSelect
++            except Exception:
++                RadioSelect = None
++            try:
++                from django.db.models import ForeignKey, OneToOneField
++            except Exception:
++                ForeignKey = None
++                OneToOneField = None
++            is_radio = False
++            if widget is not None and RadioSelect is not None:
++                if isinstance(widget, type):
++                    try:
++                        is_radio = issubclass(widget, RadioSelect)
++                    except Exception:
++                        is_radio = False
++                else:
++                    is_radio = isinstance(widget, RadioSelect)
++            is_rel_field = ((ForeignKey is not None and isinstance(f, ForeignKey)) or
++                            (OneToOneField is not None and isinstance(f, OneToOneField)))
++            if is_radio and is_rel_field and not getattr(f, 'blank', False):
++                # Force no empty label for required FK/OneToOne when using radios.
++                kwargs['empty_label'] = None
+             formfield = f.formfield(**kwargs)
+         elif not callable(formfield_callback):
+             raise TypeError('formfield_callback must be a function or callable')

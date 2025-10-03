@@ -1,0 +1,12 @@
+{
+  "info": {
+    "submission": "diff --git a/conftest.py b/conftest.py\nnew file mode 100644\nindex 0000000000..425986cfb9\n--- /dev/null\n+++ b/conftest.py\n@@ -0,0 +1,16 @@\n+import os\n+# Ensure a Django settings module is set for pytest collection.\n+# Use the minimal test settings provided in tests (tests.test_settings)\n+# or fall back to tests.test_sqlite if available.\n+if 'DJANGO_SETTINGS_MODULE' not in os.environ:\n+    # Try common test settings modules used in Django test suite\n+    for candidate in ('tests.test_settings', 'tests.test_sqlite', 'test_settings', 'test_sqlite'):\n+        try:\n+            __import__(candidate)\n+            os.environ['DJANGO_SETTINGS_MODULE'] = candidate\n+            break\n+        except Exception:\n+            continue\n+    else:\n+        # As a last resort, set a simple placeholder to avoid ImproperlyConfigured\n+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'tests.test_sqlite')\n",
+    "config": {
+      "agent": "swe-agent",
+      "model": "gpt-5-mini"
+    }
+  },
+  "messages": [],
+  "trajectory_format": "mini-swe-agent-1",
+  "instance_id": "django__django-13810"
+}

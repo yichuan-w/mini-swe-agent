@@ -1,0 +1,33 @@
+2025-10-03 03:31:53,917 - INFO - Creating container for django__django-14011...
+2025-10-03 03:31:54,051 - INFO - Container for django__django-14011 created: 1d738c4265147e13c06c8bb85f35a7980219ad9aaa0158d1a89b5c36fd34075d
+2025-10-03 03:31:54,619 - INFO - Container for django__django-14011 started: 1d738c4265147e13c06c8bb85f35a7980219ad9aaa0158d1a89b5c36fd34075d
+2025-10-03 03:31:54,621 - INFO - Intermediate patch for django__django-14011 written to logs/run_evaluation/simple/gpt-5-mini/django__django-14011/patch.diff, now applying to container...
+2025-10-03 03:31:54,762 - INFO - >>>>> Applied Patch:
+Checking patch django/test/testcases.py...
+Applied patch django/test/testcases.py cleanly.
+
+2025-10-03 03:31:55,552 - INFO - Git diff before:
+diff --git a/django/test/testcases.py b/django/test/testcases.py
+index 92f566b7b0..bb5916f3f2 100644
+--- a/django/test/testcases.py
++++ b/django/test/testcases.py
+@@ -1505,6 +1505,7 @@ class LiveServerThread(threading.Thread):
+             if self.port == 0:
+                 self.port = self.httpd.server_address[1]
+             self.httpd.set_app(handler)
++            self.httpd.daemon_threads = False
+             self.is_ready.set()
+             self.httpd.serve_forever()
+         except Exception as e:
+2025-10-03 03:31:55,552 - INFO - Eval script for django__django-14011 written to logs/run_evaluation/simple/gpt-5-mini/django__django-14011/eval.sh; copying to container...
+2025-10-03 03:32:03,441 - INFO - Test runtime: 7.83 seconds
+2025-10-03 03:32:03,442 - INFO - Test output for django__django-14011 written to logs/run_evaluation/simple/gpt-5-mini/django__django-14011/test_output.txt
+2025-10-03 03:32:03,494 - INFO - Git diff after:
+
+2025-10-03 03:32:03,496 - INFO - Git diff changed after running eval script
+2025-10-03 03:32:03,496 - INFO - Grading answer for django__django-14011...
+2025-10-03 03:32:03,497 - INFO - report: {'django__django-14011': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['test_live_server_url_is_class_property (servers.tests.LiveServerAddress)', 'Data written to the database by a view can be read.', 'Fixtures are properly loaded and visible to the live server thread.', 'test_check_model_instance_from_subview (servers.tests.LiveServerThreadedTests)', 'test_view_calls_subview (servers.tests.LiveServerThreadedTests)', 'test_404 (servers.tests.LiveServerViews)', 'A HTTP 1.1 server is supposed to support keep-alive. Since our', 'test_environ (servers.tests.LiveServerViews)', 'test_keep_alive_connection_clears_previous_request_data (servers.tests.LiveServerViews)', 'See `test_closes_connection_without_content_length` for details. This', 'test_media_files (servers.tests.LiveServerViews)', 'LiveServerTestCase reports a 404 status code when HTTP client', 'Launched server serves with HTTP 1.1.', 'test_static_files (servers.tests.LiveServerViews)', 'test_view (servers.tests.LiveServerViews)', 'Each LiveServerTestCase binds to a unique port or fails to start a', "LiveServerTestCase.port customizes the server's port."]}, 'PASS_TO_PASS': {'success': ['test_set_up_class (servers.tests.LiveServerTestCaseSetupTest)', 'Contrast to'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for django__django-14011: resolved: False
+2025-10-03 03:32:03,497 - INFO - Attempting to stop container sweb.eval.django__django-14011.simple...
+2025-10-03 03:32:18,770 - INFO - Attempting to remove container sweb.eval.django__django-14011.simple...
+2025-10-03 03:32:18,794 - INFO - Container sweb.eval.django__django-14011.simple removed.

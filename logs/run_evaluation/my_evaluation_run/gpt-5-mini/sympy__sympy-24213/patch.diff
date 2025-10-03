@@ -1,0 +1,53 @@
+I propose the following minimal patch to sympy/physics/units/unitsystem.py (replace the equality check in _collect_factor_and_dimension with an equivalence helper):
+
+--- a/sympy/physics/units/unitsystem.py
++++ b/sympy/physics/units/unitsystem.py
+@@
+ def _collect_factor_and_dimension(expr):
+@@
+-                if other_dim != base_dim:
+-                    raise ValueError('Dimension of "%s" is %s, but it should be %s'
+-                                     % (other_name, other_dim, base_dim))
++                # Accept dimensions that are semantically equivalent (for example
++                # acceleration*time and velocity).  Use a small helper that tries
++                # multiple comparison strategies rather than relying on strict
++                # object/structural equality.
++                def _dimensions_equivalent(a, b):
++                    # Fast path: exact equality
++                    if a == b:
++                        return True
++                    # Try the Dimension-specific equality/ equivalence APIs if present
++                    try:
++                        eq = getattr(a, "equals", None)
++                        if callable(eq) and eq(b):
++                            return True
++                    except Exception:
++                        pass
++                    try:
++                        is_equiv = getattr(a, "is_equivalent", None)
++                        if callable(is_equiv) and is_equiv(b):
++                            return True
++                    except Exception:
++                        pass
++                    # As a last resort, try a symbolic simplification of the difference
++                    # (some Dimension expressions behave like sympy expressions).
++                    try:
++                        from sympy import simplify
++                        if simplify(a - b) == 0:
++                            return True
++                    except Exception:
++                        pass
++                    return False
++
++                if not _dimensions_equivalent(other_dim, base_dim):
++                    raise ValueError('Dimension of "%s" is %s, but it should be %s'
++                                     % (other_name, other_dim, base_dim))
+
+Notes:
+- I could not open or modify files or run pytest in this environment due to permission and shell invocation errors. Please apply the patch locally and run:
+  pytest sympy/physics/units -q
+  or the specific units test(s) that reproduce the issue.
+
+If you'd like, I can try to apply the change here and run tests if you enable file editing/allow the commands; otherwise, this patch is ready to be applied locally.----
+
+No changes detected to generate a patch.

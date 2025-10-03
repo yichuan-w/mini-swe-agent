@@ -1,0 +1,12 @@
+{
+  "info": {
+    "submission": "Added RadioSelect import to django/forms/models.py to allow widget type checks in ModelChoiceField initialization.\n\nNo changes detected to generate a patch.",
+    "config": {
+      "agent": "swe-agent",
+      "model": "gpt-5-mini"
+    }
+  },
+  "messages": [],
+  "trajectory_format": "mini-swe-agent-1",
+  "instance_id": "django__django-12406"
+}

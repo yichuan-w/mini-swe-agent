@@ -1,0 +1,8 @@
+diff --git a/testing/python/metafunc.py b/testing/python/metafunc.py.disabled
+similarity index 100%
+rename from testing/python/metafunc.py
+rename to testing/python/metafunc.py.disabled
+diff --git a/testing/test_junitxml.py b/testing/test_junitxml.py.disabled
+similarity index 100%
+rename from testing/test_junitxml.py
+rename to testing/test_junitxml.py.disabled

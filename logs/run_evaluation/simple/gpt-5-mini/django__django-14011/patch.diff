@@ -1,0 +1,12 @@
+diff --git a/django/test/testcases.py b/django/test/testcases.py
+index 92f566b7b0..bb5916f3f2 100644
+--- a/django/test/testcases.py
++++ b/django/test/testcases.py
+@@ -1505,6 +1505,7 @@ class LiveServerThread(threading.Thread):
+             if self.port == 0:
+                 self.port = self.httpd.server_address[1]
+             self.httpd.set_app(handler)
++            self.httpd.daemon_threads = False
+             self.is_ready.set()
+             self.httpd.serve_forever()
+         except Exception as e:

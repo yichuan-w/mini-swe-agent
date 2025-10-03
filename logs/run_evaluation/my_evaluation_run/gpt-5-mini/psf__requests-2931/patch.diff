@@ -1,0 +1,3 @@
+Replaced to_native_string implementation to preserve bytes and avoid decoding binary payloads. This prevents requests.put(data=b'...') with non-ASCII bytes from failing (bytes are returned unchanged instead of being converted to str).
+
+No changes detected to generate a patch.

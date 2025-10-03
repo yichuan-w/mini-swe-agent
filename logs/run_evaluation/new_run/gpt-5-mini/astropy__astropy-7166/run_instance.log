@@ -1,0 +1,143 @@
+2025-10-03 02:24:54,135 - INFO - Creating container for astropy__astropy-7166...
+2025-10-03 02:24:54,255 - INFO - Container for astropy__astropy-7166 created: 78ceaa4948be891950c51dcb01d870689dcf4e275a42a0b205df1ccab2c23a3e
+2025-10-03 02:24:54,699 - INFO - Container for astropy__astropy-7166 started: 78ceaa4948be891950c51dcb01d870689dcf4e275a42a0b205df1ccab2c23a3e
+2025-10-03 02:24:54,699 - INFO - Intermediate patch for astropy__astropy-7166 written to logs/run_evaluation/new_run/gpt-5-mini/astropy__astropy-7166/patch.diff, now applying to container...
+2025-10-03 02:24:54,810 - INFO - >>>>> Applied Patch:
+Checking patch astropy/utils/misc.py...
+Applied patch astropy/utils/misc.py cleanly.
+
+2025-10-03 02:24:55,216 - INFO - Git diff before:
+diff --git a/astropy/utils/misc.py b/astropy/utils/misc.py
+index de3fb01d1..890cfbfd1 100644
+--- a/astropy/utils/misc.py
++++ b/astropy/utils/misc.py
+@@ -527,18 +527,48 @@ class InheritDocstrings(type):
+                  and len(key) > 4) or
+                 not key.startswith('_'))
+ 
++        def _get_underlying_func(obj):
++            """
++            Return the underlying function object for descriptors like
++            function, classmethod, staticmethod, and property.  Returns
++            None if no underlying function can be determined.
++            """
++            if inspect.isfunction(obj):
++                return obj
++            # classmethod and staticmethod wrap the function in __func__
++            if isinstance(obj, (classmethod, staticmethod)):
++                return getattr(obj, "__func__", None)
++            # property exposes the fget function
++            if isinstance(obj, property):
++                return obj.fget
++            return None
++
+         for key, val in dct.items():
+-            if (inspect.isfunction(val) and
+-                is_public_member(key) and
+-                val.__doc__ is None):
+-                for base in cls.__mro__[1:]:
+-                    super_method = getattr(base, key, None)
+-                    if super_method is not None:
+-                        val.__doc__ = super_method.__doc__
+-                        break
++            # Try to find the underlying function for the attribute in the new
++            # class dict.  If there isn't one, skip (e.g., plain data attributes).
++            target_func = _get_underlying_func(val)
++            if (target_func is None or
++                    not is_public_member(key) or
++                    target_func.__doc__ is not None):
++                continue
+ 
+-        super().__init__(name, bases, dct)
++            # Walk the MRO to find a docstring from a base class attribute.
++            for base in cls.__mro__[1:]:
++                super_attr = getattr(base, key, None)
++                if super_attr is None:
++                    continue
++
++                super_func = _get_underlying_func(super_attr)
++                if super_func is not None and super_func.__doc__ is not None:
++                    target_func.__doc__ = super_func.__doc__
++                    break
++                # Fallback: if the attribute itself has a __doc__ (e.g., some
++                # descriptors on classes), use that.
++                if getattr(super_attr, "__doc__", None) is not None:
++                    target_func.__doc__ = super_attr.__doc__
++                    break
+ 
++        super().__init__(name, bases, dct)
+ 
+ class OrderedDescriptor(metaclass=abc.ABCMeta):
+     """
+2025-10-03 02:24:55,216 - INFO - Eval script for astropy__astropy-7166 written to logs/run_evaluation/new_run/gpt-5-mini/astropy__astropy-7166/eval.sh; copying to container...
+2025-10-03 02:24:59,896 - INFO - Test runtime: 4.64 seconds
+2025-10-03 02:24:59,900 - INFO - Test output for astropy__astropy-7166 written to logs/run_evaluation/new_run/gpt-5-mini/astropy__astropy-7166/test_output.txt
+2025-10-03 02:24:59,964 - INFO - Git diff after:
+diff --git a/astropy/utils/misc.py b/astropy/utils/misc.py
+index de3fb01d1..890cfbfd1 100644
+--- a/astropy/utils/misc.py
++++ b/astropy/utils/misc.py
+@@ -527,18 +527,48 @@ class InheritDocstrings(type):
+                  and len(key) > 4) or
+                 not key.startswith('_'))
+ 
++        def _get_underlying_func(obj):
++            """
++            Return the underlying function object for descriptors like
++            function, classmethod, staticmethod, and property.  Returns
++            None if no underlying function can be determined.
++            """
++            if inspect.isfunction(obj):
++                return obj
++            # classmethod and staticmethod wrap the function in __func__
++            if isinstance(obj, (classmethod, staticmethod)):
++                return getattr(obj, "__func__", None)
++            # property exposes the fget function
++            if isinstance(obj, property):
++                return obj.fget
++            return None
++
+         for key, val in dct.items():
+-            if (inspect.isfunction(val) and
+-                is_public_member(key) and
+-                val.__doc__ is None):
+-                for base in cls.__mro__[1:]:
+-                    super_method = getattr(base, key, None)
+-                    if super_method is not None:
+-                        val.__doc__ = super_method.__doc__
+-                        break
++            # Try to find the underlying function for the attribute in the new
++            # class dict.  If there isn't one, skip (e.g., plain data attributes).
++            target_func = _get_underlying_func(val)
++            if (target_func is None or
++                    not is_public_member(key) or
++                    target_func.__doc__ is not None):
++                continue
+ 
+-        super().__init__(name, bases, dct)
++            # Walk the MRO to find a docstring from a base class attribute.
++            for base in cls.__mro__[1:]:
++                super_attr = getattr(base, key, None)
++                if super_attr is None:
++                    continue
++
++                super_func = _get_underlying_func(super_attr)
++                if super_func is not None and super_func.__doc__ is not None:
++                    target_func.__doc__ = super_func.__doc__
++                    break
++                # Fallback: if the attribute itself has a __doc__ (e.g., some
++                # descriptors on classes), use that.
++                if getattr(super_attr, "__doc__", None) is not None:
++                    target_func.__doc__ = super_attr.__doc__
++                    break
+ 
++        super().__init__(name, bases, dct)
+ 
+ class OrderedDescriptor(metaclass=abc.ABCMeta):
+     """
+2025-10-03 02:24:59,965 - INFO - Grading answer for astropy__astropy-7166...
+2025-10-03 02:24:59,966 - INFO - report: {'astropy__astropy-7166': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['astropy/utils/tests/test_misc.py::test_inherit_docstrings']}, 'PASS_TO_PASS': {'success': ['astropy/utils/tests/test_misc.py::test_isiterable', 'astropy/utils/tests/test_misc.py::test_signal_number_to_name_no_failure', 'astropy/utils/tests/test_misc.py::test_skip_hidden', 'astropy/utils/tests/test_misc.py::test_JsonCustomEncoder', 'astropy/utils/tests/test_misc.py::test_check_broadcast', 'astropy/utils/tests/test_misc.py::test_dtype_bytes_or_chars'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for astropy__astropy-7166: resolved: False
+2025-10-03 02:24:59,969 - INFO - Attempting to stop container sweb.eval.astropy__astropy-7166.new_run...
+2025-10-03 02:25:15,234 - INFO - Attempting to remove container sweb.eval.astropy__astropy-7166.new_run...
+2025-10-03 02:25:15,248 - INFO - Container sweb.eval.astropy__astropy-7166.new_run removed.

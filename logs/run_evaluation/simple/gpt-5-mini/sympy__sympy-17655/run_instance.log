@@ -1,0 +1,57 @@
+2025-10-03 03:32:37,166 - INFO - Creating container for sympy__sympy-17655...
+2025-10-03 03:32:37,215 - INFO - Container for sympy__sympy-17655 created: de3e360343e95cd196c2b42b39e6a28eafbc614fec307a3e7afee4358354c88e
+2025-10-03 03:32:37,363 - INFO - Container for sympy__sympy-17655 started: de3e360343e95cd196c2b42b39e6a28eafbc614fec307a3e7afee4358354c88e
+2025-10-03 03:32:37,364 - INFO - Intermediate patch for sympy__sympy-17655 written to logs/run_evaluation/simple/gpt-5-mini/sympy__sympy-17655/patch.diff, now applying to container...
+2025-10-03 03:32:37,482 - INFO - >>>>> Applied Patch:
+Checking patch sympy/geometry/point.py...
+Applied patch sympy/geometry/point.py cleanly.
+
+2025-10-03 03:32:37,867 - INFO - Git diff before:
+diff --git a/sympy/geometry/point.py b/sympy/geometry/point.py
+index 7c978c47be..b1b0c8338c 100644
+--- a/sympy/geometry/point.py
++++ b/sympy/geometry/point.py
+@@ -278,6 +278,14 @@ def __mul__(self, factor):
+         coords = [simplify(x*factor) for x in self.args]
+         return Point(coords, evaluate=False)
+ 
++    def __rmul__(self, factor):
++        """Right multiplication to support scalar * Point.
++
++        Delegate to __mul__ so that expressions like
++        sympy.sympify(2.0) * Point(...) behave like Point * scalar.
++        """
++        return self.__mul__(factor)
++
+     def __neg__(self):
+         """Negate the point."""
+         coords = [-x for x in self.args]
+2025-10-03 03:32:37,867 - INFO - Eval script for sympy__sympy-17655 written to logs/run_evaluation/simple/gpt-5-mini/sympy__sympy-17655/eval.sh; copying to container...
+2025-10-03 03:32:55,196 - INFO - Test runtime: 17.28 seconds
+2025-10-03 03:32:55,196 - INFO - Test output for sympy__sympy-17655 written to logs/run_evaluation/simple/gpt-5-mini/sympy__sympy-17655/test_output.txt
+2025-10-03 03:32:55,248 - INFO - Git diff after:
+diff --git a/sympy/geometry/point.py b/sympy/geometry/point.py
+index 7c978c47be..b1b0c8338c 100644
+--- a/sympy/geometry/point.py
++++ b/sympy/geometry/point.py
+@@ -278,6 +278,14 @@ def __mul__(self, factor):
+         coords = [simplify(x*factor) for x in self.args]
+         return Point(coords, evaluate=False)
+ 
++    def __rmul__(self, factor):
++        """Right multiplication to support scalar * Point.
++
++        Delegate to __mul__ so that expressions like
++        sympy.sympify(2.0) * Point(...) behave like Point * scalar.
++        """
++        return self.__mul__(factor)
++
+     def __neg__(self):
+         """Negate the point."""
+         coords = [-x for x in self.args]
+2025-10-03 03:32:55,248 - INFO - Grading answer for sympy__sympy-17655...
+2025-10-03 03:32:55,248 - INFO - report: {'sympy__sympy-17655': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['test_point', 'test_point3D'], 'failure': []}, 'PASS_TO_PASS': {'success': ['test_Point2D', 'test_issue_9214', 'test_issue_11617', 'test_transform', 'test_concyclic_doctest_bug', 'test_arguments', 'test_unit', 'test_dot', 'test__normalize_dimension'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sympy__sympy-17655: resolved: True
+2025-10-03 03:32:55,248 - INFO - Attempting to stop container sweb.eval.sympy__sympy-17655.simple...
+2025-10-03 03:33:10,440 - INFO - Attempting to remove container sweb.eval.sympy__sympy-17655.simple...
+2025-10-03 03:33:10,458 - INFO - Container sweb.eval.sympy__sympy-17655.simple removed.

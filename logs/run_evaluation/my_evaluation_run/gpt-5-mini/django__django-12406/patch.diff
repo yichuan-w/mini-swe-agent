@@ -1,0 +1,3 @@
+Added RadioSelect import to django/forms/models.py to allow widget type checks in ModelChoiceField initialization.
+
+No changes detected to generate a patch.

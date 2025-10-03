@@ -1,0 +1,12 @@
+{
+  "info": {
+    "submission": "diff --git a/sphinx/ext/napoleon/docstring.py b/sphinx/ext/napoleon/docstring.py\nindex d8cb75a5f..1fefe21e6 100644\n--- a/sphinx/ext/napoleon/docstring.py\n+++ b/sphinx/ext/napoleon/docstring.py\n@@ -266,8 +266,17 @@ class GoogleDocstring:\n         if parse_type:\n             match = _google_typed_arg_regex.match(before)\n             if match:\n-                _name = match.group(1).strip()\n-                _type = match.group(2)\n+                # Handle both 'name(type)' and 'type(name) name' styles.\n+                name_candidate = match.group(1).strip()\n+                type_candidate = match.group(2)\n+                # If there's trailing text after the closing ')', the\n+                # original string was likely 'type(...) name', so swap.\n+                if match.end() < len(before) and before[match.end():].strip():\n+                    _type = \"%s(%s)\" % (name_candidate, type_candidate)\n+                    _name = before[match.end():].strip()\n+                else:\n+                    _name = name_candidate\n+                    _type = type_candidate\n \n         _name = self._escape_args_and_kwargs(_name)\n \n",
+    "config": {
+      "agent": "swe-agent",
+      "model": "gpt-5-mini"
+    }
+  },
+  "messages": [],
+  "trajectory_format": "mini-swe-agent-1",
+  "instance_id": "sphinx-doc__sphinx-9230"
+}

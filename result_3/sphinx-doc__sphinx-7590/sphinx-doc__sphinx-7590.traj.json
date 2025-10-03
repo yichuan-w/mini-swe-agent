@@ -1,0 +1,12 @@
+{
+  "info": {
+    "submission": "diff --git a/sphinx/domains/cpp.py b/sphinx/domains/cpp.py\nindex fe52d881d..2b4e99395 100644\n--- a/sphinx/domains/cpp.py\n+++ b/sphinx/domains/cpp.py\n@@ -4662,16 +4662,31 @@ class DefinitionParser(BaseParser):\n                       integer_literal_re, octal_literal_re]:\n             pos = self.pos\n             if self.match(regex):\n-                while self.current_char in 'uUlLfF':\n+                # consume builtin suffix letters (uUlLfF)\n+                while not self.eof and self.current_char in 'uUlLfF':\n                     self.pos += 1\n+                # If a user-defined literal suffix (identifier) follows, include it.\n+                # Accept identifier_re as suffix for UDLs (e.g., 42_km, 1q_s).\n+                # We don't need to treat numeric UDLs specially here \u2014 keep the\n+                # token as a numeric literal text.\n+                if self.match(identifier_re):\n+                    return ASTNumberLiteral(self.definition[pos:self.pos])\n                 return ASTNumberLiteral(self.definition[pos:self.pos])\n \n         string = self._parse_string()\n         if string is not None:\n+            # string literal may be followed by a user-defined literal suffix\n+            if self.match(identifier_re):\n+                string = string + self.matched_text\n             return ASTStringLiteral(string)\n \n         # character-literal\n+        pos = self.pos\n         if self.match(char_literal_re):\n+            # If a user-defined literal suffix follows a character literal,\n+            # return a fallback expression containing the whole token (char+suffix).\n+            if self.match(identifier_re):\n+                return ASTFallbackExpr(self.definition[pos:self.pos])\n             prefix = self.last_match.group(1)  # may be None when no prefix\n             data = self.last_match.group(2)\n             try:\n@@ -4682,9 +4697,8 @@ class DefinitionParser(BaseParser):\n                 self.fail(\"Can not handle character literal\"\n                           \" resulting in multiple decoded characters.\")\n \n-        # TODO: user-defined lit\n+        # No literal parsed\n         return None\n-\n     def _parse_fold_or_paren_expression(self) -> ASTExpression:\n         # \"(\" expression \")\"\n         # fold-expression\n",
+    "config": {
+      "agent": "swe-agent",
+      "model": "gpt-5-mini"
+    }
+  },
+  "messages": [],
+  "trajectory_format": "mini-swe-agent-1",
+  "instance_id": "sphinx-doc__sphinx-7590"
+}

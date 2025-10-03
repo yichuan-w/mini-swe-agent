@@ -1,0 +1,12 @@
+{
+  "info": {
+    "submission": "diff --git a/sympy/geometry/point.py b/sympy/geometry/point.py\nindex 7c978c47be..b1b0c8338c 100644\n--- a/sympy/geometry/point.py\n+++ b/sympy/geometry/point.py\n@@ -278,6 +278,14 @@ def __mul__(self, factor):\n         coords = [simplify(x*factor) for x in self.args]\n         return Point(coords, evaluate=False)\n \n+    def __rmul__(self, factor):\n+        \"\"\"Right multiplication to support scalar * Point.\n+\n+        Delegate to __mul__ so that expressions like\n+        sympy.sympify(2.0) * Point(...) behave like Point * scalar.\n+        \"\"\"\n+        return self.__mul__(factor)\n+\n     def __neg__(self):\n         \"\"\"Negate the point.\"\"\"\n         coords = [-x for x in self.args]\n",
+    "config": {
+      "agent": "swe-agent",
+      "model": "gpt-5-mini"
+    }
+  },
+  "messages": [],
+  "trajectory_format": "mini-swe-agent-1",
+  "instance_id": "sympy__sympy-17655"
+}

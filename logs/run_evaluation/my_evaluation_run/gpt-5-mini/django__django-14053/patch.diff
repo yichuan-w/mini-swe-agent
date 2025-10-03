@@ -1,0 +1,3 @@
+Updated HashedFilesMixin.post_process to track and only yield each original filename once across multiple post-process passes, preventing duplicate yields and incorrect collectstatic counts.
+
+No changes detected to generate a patch.

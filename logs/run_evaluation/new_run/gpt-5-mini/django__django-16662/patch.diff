@@ -1,0 +1,27 @@
+diff --git a/django/db/migrations/writer.py b/django/db/migrations/writer.py
+index a59f0c8dcb..39f7c0b44d 100644
+--- a/django/db/migrations/writer.py
++++ b/django/db/migrations/writer.py
+@@ -171,12 +171,17 @@ class MigrationWriter:
+             imports.discard("from django.db import models")
+             imports.add("from django.db import migrations, models")
+         else:
+-            imports.add("from django.db import migrations")
+-
+-        # Sort imports by the package / module to be imported (the part after
++            imports.add("from django.db import migrations")# Sort imports by the package / module to be imported (the part after
+         # "from" in "from ... import ..." or after "import" in "import ...").
+-        sorted_imports = sorted(imports, key=lambda i: i.split()[1])
+-        items["imports"] = "\n".join(sorted_imports) + "\n" if imports else ""
++        def import_sort_key(i):
++            parts = i.split()
++            kind = parts[0]  # 'import' or 'from'
++            module = parts[1]
++            # Ensure module imports ("import X") come before "from X import Y" imports,
++            # then sort by the module/package name.
++            return (0 if kind == "import" else 1, module)
++        sorted_imports = sorted(imports, key=import_sort_key)
++        items["imports"] = "\\n".join(sorted_imports) + "\\n" if imports else ""
+         if migration_imports:
+             items["imports"] += (
+                 "\n\n# Functions from the following migrations need manual "

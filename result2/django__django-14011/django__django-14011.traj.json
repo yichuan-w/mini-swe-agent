@@ -1,0 +1,12 @@
+{
+  "info": {
+    "submission": "diff --git a/django/test/testcases.py b/django/test/testcases.py\nindex 92f566b7b0..b7bb9d272b 100644\n--- a/django/test/testcases.py\n+++ b/django/test/testcases.py\n@@ -1514,11 +1514,16 @@ class LiveServerThread(threading.Thread):\n             connections.close_all()\n \n     def _create_server(self):\n-        return self.server_class(\n+        server = self.server_class(\n             (self.host, self.port),\n             QuietWSGIRequestHandler,\n             allow_reuse_address=False,\n         )\n+        # Ensure request-handler threads are not daemonized so shutdown waits\n+        # for them and database connections can be closed cleanly.\n+        if hasattr(server, 'daemon_threads'):\n+            server.daemon_threads = False\n+        return server\n \n     def terminate(self):\n         if hasattr(self, 'httpd'):\n",
+    "config": {
+      "agent": "swe-agent",
+      "model": "gpt-5-mini"
+    }
+  },
+  "messages": [],
+  "trajectory_format": "mini-swe-agent-1",
+  "instance_id": "django__django-14011"
+}

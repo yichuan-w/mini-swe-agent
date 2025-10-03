@@ -1,0 +1,12 @@
+{
+  "info": {
+    "submission": "diff --git a/django/db/migrations/writer.py b/django/db/migrations/writer.py\nindex a59f0c8dcb..39f7c0b44d 100644\n--- a/django/db/migrations/writer.py\n+++ b/django/db/migrations/writer.py\n@@ -171,12 +171,17 @@ class MigrationWriter:\n             imports.discard(\"from django.db import models\")\n             imports.add(\"from django.db import migrations, models\")\n         else:\n-            imports.add(\"from django.db import migrations\")\n-\n-        # Sort imports by the package / module to be imported (the part after\n+            imports.add(\"from django.db import migrations\")# Sort imports by the package / module to be imported (the part after\n         # \"from\" in \"from ... import ...\" or after \"import\" in \"import ...\").\n-        sorted_imports = sorted(imports, key=lambda i: i.split()[1])\n-        items[\"imports\"] = \"\\n\".join(sorted_imports) + \"\\n\" if imports else \"\"\n+        def import_sort_key(i):\n+            parts = i.split()\n+            kind = parts[0]  # 'import' or 'from'\n+            module = parts[1]\n+            # Ensure module imports (\"import X\") come before \"from X import Y\" imports,\n+            # then sort by the module/package name.\n+            return (0 if kind == \"import\" else 1, module)\n+        sorted_imports = sorted(imports, key=import_sort_key)\n+        items[\"imports\"] = \"\\\\n\".join(sorted_imports) + \"\\\\n\" if imports else \"\"\n         if migration_imports:\n             items[\"imports\"] += (\n                 \"\\n\\n# Functions from the following migrations need manual \"\n",
+    "config": {
+      "agent": "swe-agent",
+      "model": "gpt-5-mini"
+    }
+  },
+  "messages": [],
+  "trajectory_format": "mini-swe-agent-1",
+  "instance_id": "django__django-16662"
+}

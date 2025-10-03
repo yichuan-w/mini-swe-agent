@@ -1,0 +1,54 @@
+diff --git a/sphinx/domains/cpp.py b/sphinx/domains/cpp.py
+index fe52d881d..6bceb0371 100644
+--- a/sphinx/domains/cpp.py
++++ b/sphinx/domains/cpp.py
+@@ -882,6 +882,22 @@ class ASTCharLiteral(ASTLiteral):
+         signode.append(nodes.Text(txt, txt))
+ 
+ 
++
++class ASTUserDefinedLiteral(ASTLiteral):
++    def __init__(self, literal_value: ASTLiteral, identifier: ASTIdentifier) -> None:
++        # literal_value: the original literal AST node (number, string, or char)
++        # identifier: the user-defined literal suffix identifier
++        self.literal_value = literal_value
++        self.identifier = identifier
++
++    def _stringify(self, transform: "StringifyTransform") -> str:
++        # Render as <literal><identifier>, e.g. 1.0_m, "str"_s, 'c'_c
++        return ''.join([transform(self.literal_value), transform(self.identifier)])
++
++    def get_id(self, version: int) -> str:
++        # Compose id from underlying literal id-ish text and identifier id
++        # For simplicity, reuse identifier id prefixed with 'udl' to avoid clashes.
++        return 'udl' + self.identifier.get_id(version)
+ class ASTThisLiteral(ASTExpression):
+     def _stringify(self, transform: StringifyTransform) -> str:
+         return "this"
+@@ -4668,14 +4684,24 @@ class DefinitionParser(BaseParser):
+ 
+         string = self._parse_string()
+         if string is not None:
+-            return ASTStringLiteral(string)
++            node = ASTStringLiteral(string)
++            # check for UDL suffix after string literal
++            if self.match(identifier_re):
++                ident = ASTIdentifier(self.matched_text)
++                return ASTUserDefinedLiteral(node, ident)
++            return node
+ 
+         # character-literal
+         if self.match(char_literal_re):
+             prefix = self.last_match.group(1)  # may be None when no prefix
+             data = self.last_match.group(2)
+             try:
+-                return ASTCharLiteral(prefix, data)
++                node = ASTCharLiteral(prefix, data)
++                # check for UDL suffix after char literal
++                if self.match(identifier_re):
++                    ident = ASTIdentifier(self.matched_text)
++                    return ASTUserDefinedLiteral(node, ident)
++                return node
+             except UnicodeDecodeError as e:
+                 self.fail("Can not handle character literal. Internal error was: %s" % e)
+             except UnsupportedMultiCharacterCharLiteral:

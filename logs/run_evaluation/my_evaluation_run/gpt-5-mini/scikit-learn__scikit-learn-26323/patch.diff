@@ -1,0 +1,63 @@
+diff --git a/sklearn/compose/_column_transformer.py b/sklearn/compose/_column_transformer.py
+index 4eddd12b1..fd290df6b 100644
+--- a/sklearn/compose/_column_transformer.py
++++ b/sklearn/compose/_column_transformer.py
+@@ -663,17 +663,41 @@ class ColumnTransformer(TransformerMixin, _BaseComposition):
+             )
+         )
+         try:
+-            return Parallel(n_jobs=self.n_jobs)(
+-                delayed(func)(
+-                    transformer=clone(trans) if not fitted else trans,
+-                    X=_safe_indexing(X, column, axis=1),
+-                    y=y,
+-                    weight=weight,
+-                    message_clsname="ColumnTransformer",
+-                    message=self._log_message(name, idx, len(transformers)),
++            # Prepare delayed tasks and ensure that, when cloning estimators for
++            # fitting/transforming, any set_output configuration present on this
++            # ColumnTransformer is propagated to the cloned child estimator. This
++            # is necessary because clone(estimator) does not copy arbitrary
++            # attributes such as _sklearn_output_config, so calling
++            # set_output on the original estimator before fit would not affect
++            # the clone used during parallel execution.
++            tasks = []
++            for idx, (name, trans, column, weight) in enumerate(transformers, 1):
++                transformer_instance = clone(trans) if not fitted else trans
++
++                # If ColumnTransformer has been configured with set_output, and
++                # we just cloned the child estimator (i.e., before fitting), try
++                # to apply the same configuration to the clone so that its
++                # transform/fit_transform will produce the desired container.
++                if not fitted and hasattr(self, "_sklearn_output_config"):
++                    transform_config = self._sklearn_output_config.get("transform", None)
++                    try:
++                        _safe_set_output(transformer_instance, transform=transform_config)
++                    except ValueError:
++                        # If the estimator does not support set_output, ignore.
++                        pass
++
++                tasks.append(
++                    delayed(func)(
++                        transformer=transformer_instance,
++                        X=_safe_indexing(X, column, axis=1),
++                        y=y,
++                        weight=weight,
++                        message_clsname="ColumnTransformer",
++                        message=self._log_message(name, idx, len(transformers)),
++                    )
+                 )
+-                for idx, (name, trans, column, weight) in enumerate(transformers, 1)
+-            )
++
++            return Parallel(n_jobs=self.n_jobs)(tasks)
+         except ValueError as e:
+             if "Expected 2D array, got 1D array instead" in str(e):
+                 raise ValueError(_ERR_MSG_1DCOLUMN) from e
+@@ -1141,4 +1165,4 @@ class make_column_selector:
+         cols = df_row.columns
+         if self.pattern is not None:
+             cols = cols[cols.str.contains(self.pattern, regex=True)]
+-        return cols.tolist()
++        return cols.tolist()
+\ No newline at end of file

@@ -1,0 +1,24 @@
+diff --git a/sphinx/ext/napoleon/docstring.py b/sphinx/ext/napoleon/docstring.py
+index d8cb75a5f..1fefe21e6 100644
+--- a/sphinx/ext/napoleon/docstring.py
++++ b/sphinx/ext/napoleon/docstring.py
+@@ -266,8 +266,17 @@ class GoogleDocstring:
+         if parse_type:
+             match = _google_typed_arg_regex.match(before)
+             if match:
+-                _name = match.group(1).strip()
+-                _type = match.group(2)
++                # Handle both 'name(type)' and 'type(name) name' styles.
++                name_candidate = match.group(1).strip()
++                type_candidate = match.group(2)
++                # If there's trailing text after the closing ')', the
++                # original string was likely 'type(...) name', so swap.
++                if match.end() < len(before) and before[match.end():].strip():
++                    _type = "%s(%s)" % (name_candidate, type_candidate)
++                    _name = before[match.end():].strip()
++                else:
++                    _name = name_candidate
++                    _type = type_candidate
+ 
+         _name = self._escape_args_and_kwargs(_name)
+ 

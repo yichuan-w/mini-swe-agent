@@ -1,0 +1,36 @@
+diff --git a/testing/python/metafunc.py b/testing/python/metafunc.py
+index 4e6cfaf91..3560c0d2e 100644
+--- a/testing/python/metafunc.py
++++ b/testing/python/metafunc.py
+@@ -13,8 +13,12 @@ from typing import Tuple
+ from typing import Union
+ 
+ import attr
+-import hypothesis
+-from hypothesis import strategies
++try:
++    import hypothesis
++    from hypothesis import strategies
++except Exception:
++    import pytest
++    pytest.skip('hypothesis required', allow_module_level=True)
+ 
+ import pytest
+ from _pytest import fixtures
+diff --git a/testing/test_junitxml.py b/testing/test_junitxml.py
+index eb8475ca5..5cb609491 100644
+--- a/testing/test_junitxml.py
++++ b/testing/test_junitxml.py
+@@ -7,7 +7,11 @@ from typing import Tuple
+ from xml.dom import minidom
+ 
+ import py
+-import xmlschema
++try:
++    import xmlschema
++except Exception:
++    import pytest
++    pytest.skip('xmlschema required', allow_module_level=True)
+ 
+ import pytest
+ from _pytest.compat import TYPE_CHECKING

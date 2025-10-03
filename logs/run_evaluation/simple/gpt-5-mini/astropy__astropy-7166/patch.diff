@@ -1,0 +1,32 @@
+diff --git a/astropy/utils/misc.py b/astropy/utils/misc.py
+index de3fb01d1..6c3b3f53d 100644
+--- a/astropy/utils/misc.py
++++ b/astropy/utils/misc.py
+@@ -528,6 +528,8 @@ class InheritDocstrings(type):
+                 not key.startswith('_'))
+ 
+         for key, val in dct.items():
++            # Regular methods/functions: inherit docstring from the first
++            # base class that defines it.
+             if (inspect.isfunction(val) and
+                 is_public_member(key) and
+                 val.__doc__ is None):
+@@ -536,6 +538,18 @@ class InheritDocstrings(type):
+                     if super_method is not None:
+                         val.__doc__ = super_method.__doc__
+                         break
++            # Properties: inspect.isfunction returns False for property objects,
++            # so handle them explicitly by inheriting the getter's docstring.
++            elif (isinstance(val, property) and
++                  is_public_member(key) and
++                  (val.fget is not None and val.fget.__doc__ is None)):
++                for base in cls.__mro__[1:]:
++                    super_method = getattr(base, key, None)
++                    if isinstance(super_method, property):
++                        if super_method.fget is not None and super_method.fget.__doc__ is not None:
++                            # Set the fget docstring so property.__doc__ reflects it.
++                            val.fget.__doc__ = super_method.fget.__doc__
++                            break
+ 
+         super().__init__(name, bases, dct)
+ 

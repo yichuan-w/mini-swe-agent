@@ -1,0 +1,12 @@
+{
+  "info": {
+    "submission": "diff --git a/astropy/utils/misc.py b/astropy/utils/misc.py\nindex de3fb01d1..6c3b3f53d 100644\n--- a/astropy/utils/misc.py\n+++ b/astropy/utils/misc.py\n@@ -528,6 +528,8 @@ class InheritDocstrings(type):\n                 not key.startswith('_'))\n \n         for key, val in dct.items():\n+            # Regular methods/functions: inherit docstring from the first\n+            # base class that defines it.\n             if (inspect.isfunction(val) and\n                 is_public_member(key) and\n                 val.__doc__ is None):\n@@ -536,6 +538,18 @@ class InheritDocstrings(type):\n                     if super_method is not None:\n                         val.__doc__ = super_method.__doc__\n                         break\n+            # Properties: inspect.isfunction returns False for property objects,\n+            # so handle them explicitly by inheriting the getter's docstring.\n+            elif (isinstance(val, property) and\n+                  is_public_member(key) and\n+                  (val.fget is not None and val.fget.__doc__ is None)):\n+                for base in cls.__mro__[1:]:\n+                    super_method = getattr(base, key, None)\n+                    if isinstance(super_method, property):\n+                        if super_method.fget is not None and super_method.fget.__doc__ is not None:\n+                            # Set the fget docstring so property.__doc__ reflects it.\n+                            val.fget.__doc__ = super_method.fget.__doc__\n+                            break\n \n         super().__init__(name, bases, dct)\n \n",
+    "config": {
+      "agent": "swe-agent",
+      "model": "gpt-5-mini"
+    }
+  },
+  "messages": [],
+  "trajectory_format": "mini-swe-agent-1",
+  "instance_id": "astropy__astropy-7166"
+}

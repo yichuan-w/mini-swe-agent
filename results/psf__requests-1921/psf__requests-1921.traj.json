@@ -1,0 +1,12 @@
+{
+  "info": {
+    "submission": "I explained why assigning None results in \"Accept-Encoding: None\" (Requests stringifies header values), and provided the correct solutions: del session.headers['Accept-Encoding'] or session.headers.pop('Accept-Encoding', None); alternatives: session.headers.clear() to remove all defaults or pass a modified headers dict per-request. Example code included.\n\nNo changes detected to generate a patch.",
+    "config": {
+      "agent": "swe-agent",
+      "model": "gpt-5-mini"
+    }
+  },
+  "messages": [],
+  "trajectory_format": "mini-swe-agent-1",
+  "instance_id": "psf__requests-1921"
+}

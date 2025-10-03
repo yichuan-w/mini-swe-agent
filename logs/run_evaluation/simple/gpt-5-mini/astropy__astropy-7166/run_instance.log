@@ -1,0 +1,81 @@
+2025-10-03 03:31:53,916 - INFO - Creating container for astropy__astropy-7166...
+2025-10-03 03:31:54,045 - INFO - Container for astropy__astropy-7166 created: 229f1d6bb9d9b7f038f92a0d5ac63c3b41cf71c806a3ac3eae7c3e8aa24e5ff5
+2025-10-03 03:31:54,210 - INFO - Container for astropy__astropy-7166 started: 229f1d6bb9d9b7f038f92a0d5ac63c3b41cf71c806a3ac3eae7c3e8aa24e5ff5
+2025-10-03 03:31:54,210 - INFO - Intermediate patch for astropy__astropy-7166 written to logs/run_evaluation/simple/gpt-5-mini/astropy__astropy-7166/patch.diff, now applying to container...
+2025-10-03 03:31:54,383 - INFO - >>>>> Applied Patch:
+Checking patch astropy/utils/misc.py...
+Applied patch astropy/utils/misc.py cleanly.
+
+2025-10-03 03:31:54,872 - INFO - Git diff before:
+diff --git a/astropy/utils/misc.py b/astropy/utils/misc.py
+index de3fb01d1..6c3b3f53d 100644
+--- a/astropy/utils/misc.py
++++ b/astropy/utils/misc.py
+@@ -528,6 +528,8 @@ class InheritDocstrings(type):
+                 not key.startswith('_'))
+ 
+         for key, val in dct.items():
++            # Regular methods/functions: inherit docstring from the first
++            # base class that defines it.
+             if (inspect.isfunction(val) and
+                 is_public_member(key) and
+                 val.__doc__ is None):
+@@ -536,6 +538,18 @@ class InheritDocstrings(type):
+                     if super_method is not None:
+                         val.__doc__ = super_method.__doc__
+                         break
++            # Properties: inspect.isfunction returns False for property objects,
++            # so handle them explicitly by inheriting the getter's docstring.
++            elif (isinstance(val, property) and
++                  is_public_member(key) and
++                  (val.fget is not None and val.fget.__doc__ is None)):
++                for base in cls.__mro__[1:]:
++                    super_method = getattr(base, key, None)
++                    if isinstance(super_method, property):
++                        if super_method.fget is not None and super_method.fget.__doc__ is not None:
++                            # Set the fget docstring so property.__doc__ reflects it.
++                            val.fget.__doc__ = super_method.fget.__doc__
++                            break
+ 
+         super().__init__(name, bases, dct)
+2025-10-03 03:31:54,873 - INFO - Eval script for astropy__astropy-7166 written to logs/run_evaluation/simple/gpt-5-mini/astropy__astropy-7166/eval.sh; copying to container...
+2025-10-03 03:31:59,593 - INFO - Test runtime: 4.66 seconds
+2025-10-03 03:31:59,595 - INFO - Test output for astropy__astropy-7166 written to logs/run_evaluation/simple/gpt-5-mini/astropy__astropy-7166/test_output.txt
+2025-10-03 03:31:59,660 - INFO - Git diff after:
+diff --git a/astropy/utils/misc.py b/astropy/utils/misc.py
+index de3fb01d1..6c3b3f53d 100644
+--- a/astropy/utils/misc.py
++++ b/astropy/utils/misc.py
+@@ -528,6 +528,8 @@ class InheritDocstrings(type):
+                 not key.startswith('_'))
+ 
+         for key, val in dct.items():
++            # Regular methods/functions: inherit docstring from the first
++            # base class that defines it.
+             if (inspect.isfunction(val) and
+                 is_public_member(key) and
+                 val.__doc__ is None):
+@@ -536,6 +538,18 @@ class InheritDocstrings(type):
+                     if super_method is not None:
+                         val.__doc__ = super_method.__doc__
+                         break
++            # Properties: inspect.isfunction returns False for property objects,
++            # so handle them explicitly by inheriting the getter's docstring.
++            elif (isinstance(val, property) and
++                  is_public_member(key) and
++                  (val.fget is not None and val.fget.__doc__ is None)):
++                for base in cls.__mro__[1:]:
++                    super_method = getattr(base, key, None)
++                    if isinstance(super_method, property):
++                        if super_method.fget is not None and super_method.fget.__doc__ is not None:
++                            # Set the fget docstring so property.__doc__ reflects it.
++                            val.fget.__doc__ = super_method.fget.__doc__
++                            break
+ 
+         super().__init__(name, bases, dct)
+2025-10-03 03:31:59,660 - INFO - Grading answer for astropy__astropy-7166...
+2025-10-03 03:31:59,661 - INFO - report: {'astropy__astropy-7166': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['astropy/utils/tests/test_misc.py::test_inherit_docstrings']}, 'PASS_TO_PASS': {'success': ['astropy/utils/tests/test_misc.py::test_isiterable', 'astropy/utils/tests/test_misc.py::test_signal_number_to_name_no_failure', 'astropy/utils/tests/test_misc.py::test_skip_hidden', 'astropy/utils/tests/test_misc.py::test_JsonCustomEncoder', 'astropy/utils/tests/test_misc.py::test_check_broadcast', 'astropy/utils/tests/test_misc.py::test_dtype_bytes_or_chars'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for astropy__astropy-7166: resolved: False
+2025-10-03 03:31:59,661 - INFO - Attempting to stop container sweb.eval.astropy__astropy-7166.simple...
+2025-10-03 03:32:14,909 - INFO - Attempting to remove container sweb.eval.astropy__astropy-7166.simple...
+2025-10-03 03:32:14,921 - INFO - Container sweb.eval.astropy__astropy-7166.simple removed.

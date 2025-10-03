@@ -1,0 +1,12 @@
+{
+  "info": {
+    "submission": "diff --git a/django/views/generic/base.py b/django/views/generic/base.py\nindex ea5baca08d..7b62e5a1c9 100644\n--- a/django/views/generic/base.py\n+++ b/django/views/generic/base.py\n@@ -177,6 +177,19 @@ def _wrap_url_kwargs_with_deprecation_warning(url_kwargs):\n                 'view.kwargs instead.' % key,\n                 RemovedInDjango40Warning, stacklevel=2,\n             )\n+            # If the URL kwarg is a LazyObject (for example, SimpleLazyObject),\n+            # force its evaluation and return the wrapped concrete object to\n+            # avoid passing proxy objects (which can cause DB binding errors).\n+            try:\n+                from django.utils.functional import LazyObject, empty as _empty\n+            except Exception:\n+                return value\n+            if isinstance(value, LazyObject):\n+                # Ensure the lazy object has been initialized.\n+                if getattr(value, '_wrapped', _empty) is _empty:\n+                    # _setup is the LazyObject hook that initializes the wrapped object.\n+                    value._setup()\n+                return value._wrapped\n             return value\n         context_kwargs[key] = access_value\n     return context_kwargs\n",
+    "config": {
+      "agent": "swe-agent",
+      "model": "gpt-5-mini"
+    }
+  },
+  "messages": [],
+  "trajectory_format": "mini-swe-agent-1",
+  "instance_id": "django__django-13297"
+}

@@ -47,11 +47,13 @@ def process_instance(
         env = SWEEnvironment(instance)
         # Initialize the agent
         agent = ReactAgent("swe-agent", parser, llm)
+        # Register environment tools
+        agent.add_functions([env.run_bash_cmd])
+        # agent.add_functions([env.run_bash_cmd, env.replace_in_file, env.show_file])
+        # Provide env reference so the agent can query staged changes before finishing
+        agent.env = env  # type: ignore[attr-defined]
         # Run the agent
         output = agent.run(task, max_steps) 
-        
-        # TODO(student): Add more functions here
-        # agent.add_functions([env.run_bash_cmd, env.replace_in_file, env.show_file, ...])
         
         # Generate patch for SWE-Bench
         result = env.generate_patch(output)
@@ -74,7 +76,7 @@ def process_instance(
 def main(
     subset: str = typer.Option("cs294", "--subset", help="SWEBench subset used or path to a dataset", rich_help_panel="Data selection"),
     split: str = typer.Option("test", "--split", help="Dataset split", rich_help_panel="Data selection"),
-    output: str = typer.Option("outputs", "-o", "--output", help="Output directory", rich_help_panel="Basic"),
+    output: str = typer.Option("results", "-o", "--output", help="Output directory", rich_help_panel="Basic"),
     model_name: str = typer.Option("gpt-5-mini", "--model", help="Model used", rich_help_panel="Basic"),
     max_steps: int = typer.Option(100, "--max-steps", help="Maximum number of steps", rich_help_panel="Basic"),
     # NOTE: provide any extra arguments if needed
@@ -86,7 +88,11 @@ def main(
     dataset_path = DATASET_MAPPING.get(subset, subset)
     print(f"Loading dataset {dataset_path}, split {split}...")
     instances = list(load_dataset(dataset_path, split=split))
+    print(f"Loaded dataset {dataset_path}, split {split}...")
     print(f"Running on {len(instances)} instances...")
+    # instances = [instances[7]]
+    print(f"Running on {len(instances)} instances...")
+    # print(f"Instances: {instances}")
 
     def process_futures(futures: dict[concurrent.futures.Future, str]):
         for future in concurrent.futures.as_completed(futures):

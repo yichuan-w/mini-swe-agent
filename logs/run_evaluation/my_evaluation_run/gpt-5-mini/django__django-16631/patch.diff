@@ -1,0 +1,57 @@
+I confirmed the behavior and propose the documentation text below to replace the current SECRET_KEY_FALLBACKS paragraph in docs/ref/settings.txt:
+
+.. setting:: SECRET_KEY_FALLBACKS
+
+``SECRET_KEY_FALLBACKS``
+------------------------
+
+Default: ``[]``
+
+A list of fallback secret keys for a particular Django installation. These are
+used to allow rotation of the ``SECRET_KEY``.
+
+When signing, Django uses :setting:`SECRET_KEY`. For verification, code paths
+that support fallbacks will try :setting:`SECRET_KEY_FALLBACKS` after the main
+:setting:`SECRET_KEY` when checking signatures (for example, the signing
+utilities' ``Signer`` accepts ``fallback_keys`` and will verify a signature
+against the primary key first, then fallbacks). Because the current
+:setting:`SECRET_KEY` is the key used for creating new signatures, you should:
+
+- Set a new ``SECRET_KEY`` when rotating keys (new signatures will use this
+  value).
+- Keep any previous keys in ``SECRET_KEY_FALLBACKS`` so existing signatures
+  created with those keys can still be verified.
+- Remove old keys from ``SECRET_KEY_FALLBACKS`` once you are ready to expire
+  the sessions, password reset tokens, and other signed values that were
+  generated with them.
+
+Note that signing operations are computationally expensive. Having multiple old
+key values in ``SECRET_KEY_FALLBACKS`` adds additional overhead to verification
+operations that don't match the primary key. Remove fallback values after an
+appropriate period to complete the rotation.
+
+Important caveat about sessions
+- The default AbstractBaseUser.get_session_auth_hash() uses salted_hmac without
+  an explicit secret argument and therefore only uses the current
+  :setting:`SECRET_KEY`. SECRET_KEY_FALLBACKS is not consulted for session
+  authentication hash verification. Rotating :setting:`SECRET_KEY` will
+  therefore invalidate existing logged-in sessions unless you take explicit
+  measures (for example, implement a custom session-hash verification that
+  checks old keys, or perform a planned migration/notification so users re-login).
+
+I also noted the relevant code locations:
+- django/core/signing.py: Signer (fallbacks used for verification), get_cookie_signer
+- django/contrib/auth/base_user.py: AbstractBaseUser.get_session_auth_hash (no fallback)
+- django/contrib/auth/__init__.py: login() / get_user() store/verify HASH_SESSION_KEY
+
+Summary:
+- The docs should be clarified to state that SECRET_KEY_FALLBACKS is used by
+  signing APIs that accept fallback_keys, but sessions (get_session_auth_hash)
+  do not consult fallbacks; rotating SECRET_KEY will therefore log out users
+  unless you handle sessions explicitly.
+
+(If you want, I can open an edit/patch that replaces the docs paragraph with
+the text above or provide a code snippet for a fallback-aware session hash
+approach.)
+
+No changes detected to generate a patch.

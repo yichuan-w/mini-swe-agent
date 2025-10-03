@@ -1,0 +1,12 @@
+{
+  "info": {
+    "submission": "diff --git a/django/forms/models.py b/django/forms/models.py\nindex dafc11f995..aa0c8a2f2c 100644\n--- a/django/forms/models.py\n+++ b/django/forms/models.py\n@@ -171,6 +171,35 @@ def fields_for_model(model, fields=None, exclude=None, widgets=None,\n             kwargs['form_class'] = field_classes[f.name]\n \n         if formfield_callback is None:\n+            # If a relation field is rendered with a RadioSelect widget and the\n+            # model field does not allow blank, don't provide an empty_label\n+            # (the \"---------\" choice). Radios have an inherent unfilled\n+            # state, so an explicit empty choice is confusing for required\n+            # foreign keys.\n+            widget = kwargs.get('widget')\n+            try:\n+                from django.forms import RadioSelect\n+            except Exception:\n+                RadioSelect = None\n+            try:\n+                from django.db.models import ForeignKey, OneToOneField\n+            except Exception:\n+                ForeignKey = None\n+                OneToOneField = None\n+            is_radio = False\n+            if widget is not None and RadioSelect is not None:\n+                if isinstance(widget, type):\n+                    try:\n+                        is_radio = issubclass(widget, RadioSelect)\n+                    except Exception:\n+                        is_radio = False\n+                else:\n+                    is_radio = isinstance(widget, RadioSelect)\n+            is_rel_field = ((ForeignKey is not None and isinstance(f, ForeignKey)) or\n+                            (OneToOneField is not None and isinstance(f, OneToOneField)))\n+            if is_radio and is_rel_field and not getattr(f, 'blank', False):\n+                # Force no empty label for required FK/OneToOne when using radios.\n+                kwargs['empty_label'] = None\n             formfield = f.formfield(**kwargs)\n         elif not callable(formfield_callback):\n             raise TypeError('formfield_callback must be a function or callable')\n",
+    "config": {
+      "agent": "swe-agent",
+      "model": "gpt-5-mini"
+    }
+  },
+  "messages": [],
+  "trajectory_format": "mini-swe-agent-1",
+  "instance_id": "django__django-12406"
+}

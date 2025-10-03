@@ -1,0 +1,3 @@
+I explained why assigning None results in "Accept-Encoding: None" (Requests stringifies header values), and provided the correct solutions: del session.headers['Accept-Encoding'] or session.headers.pop('Accept-Encoding', None); alternatives: session.headers.clear() to remove all defaults or pass a modified headers dict per-request. Example code included.
+
+No changes detected to generate a patch.

@@ -1,0 +1,9 @@
+Add explanation and suggested fix: implement Point.__rmul__ delegating to __mul__ so scalar * Point returns a Point (avoid Mul in addition). Example code to add:
+
+def __rmul__(self, other):
+    """Right multiplication: allow scalar * Point to behave like Point * scalar."""
+    return self.__mul__(other)
+
+This resolves the GeometryError shown (2.0*Point2D(...) becomes a Point).
+
+No changes detected to generate a patch.
