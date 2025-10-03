@@ -1,0 +1,12 @@
+{
+  "info": {
+    "submission": "diff --git a/test_requests.py b/test_requests.py\nindex 137edc0..dec7cd9 100755\n--- a/test_requests.py\n+++ b/test_requests.py\n@@ -48,8 +48,8 @@ else:\n         return s.decode('unicode-escape')\n \n \n-@pytest.fixture\n-def httpbin(httpbin):\n+@pytest.fixture(name='httpbin')\n+def _httpbin(httpbin):\n     # Issue #1483: Make sure the URL always has a trailing slash\n     httpbin_url = httpbin.url.rstrip('/') + '/'\n \n@@ -58,9 +58,8 @@ def httpbin(httpbin):\n \n     return inner\n \n-\n-@pytest.fixture\n-def httpsbin_url(httpbin_secure):\n+@pytest.fixture(name='httpsbin_url')\n+def _httpsbin_url(httpbin_secure):\n     # Issue #1483: Make sure the URL always has a trailing slash\n     httpbin_url = httpbin_secure.url.rstrip('/') + '/'\n \n@@ -69,7 +68,6 @@ def httpsbin_url(httpbin_secure):\n \n     return inner\n \n-\n # Requests to this URL should always fail with a connection timeout (nothing\n # listening on that port)\n TARPIT = \"http://10.255.255.1\"\n",
+    "config": {
+      "agent": "swe-agent",
+      "model": "gpt-5-mini"
+    }
+  },
+  "messages": [],
+  "trajectory_format": "mini-swe-agent-1",
+  "instance_id": "psf__requests-2931"
+}

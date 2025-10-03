@@ -1,0 +1,12 @@
+{
+  "info": {
+    "submission": "diff --git a/sphinx/ext/napoleon/docstring.py b/sphinx/ext/napoleon/docstring.py\nindex d8cb75a5f..79477f813 100644\n--- a/sphinx/ext/napoleon/docstring.py\n+++ b/sphinx/ext/napoleon/docstring.py\n@@ -268,6 +268,15 @@ class GoogleDocstring:\n             if match:\n                 _name = match.group(1).strip()\n                 _type = match.group(2)\n+            else:\n+                # Handle non-standard 'type name' ordering, e.g.:\n+                #   dict(str, str) opc_meta: (optional)\n+                # Accept a leading type followed by a name when the usual\n+                # 'name(type)' pattern isn't present.\n+                rev_match = re.match(r\"\\s*(?P<type>\\S+\\(.*\\))\\s+(?P<name>.+)\", before)\n+                if rev_match:\n+                    _type = rev_match.group('type')\n+                    _name = rev_match.group('name').strip()\n \n         _name = self._escape_args_and_kwargs(_name)\n \n",
+    "config": {
+      "agent": "swe-agent",
+      "model": "gpt-5-mini"
+    }
+  },
+  "messages": [],
+  "trajectory_format": "mini-swe-agent-1",
+  "instance_id": "sphinx-doc__sphinx-9230"
+}

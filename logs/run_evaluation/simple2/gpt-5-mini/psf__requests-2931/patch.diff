@@ -1,0 +1,35 @@
+diff --git a/test_requests.py b/test_requests.py
+index 137edc0..dec7cd9 100755
+--- a/test_requests.py
++++ b/test_requests.py
+@@ -48,8 +48,8 @@ else:
+         return s.decode('unicode-escape')
+ 
+ 
+-@pytest.fixture
+-def httpbin(httpbin):
++@pytest.fixture(name='httpbin')
++def _httpbin(httpbin):
+     # Issue #1483: Make sure the URL always has a trailing slash
+     httpbin_url = httpbin.url.rstrip('/') + '/'
+ 
+@@ -58,9 +58,8 @@ def httpbin(httpbin):
+ 
+     return inner
+ 
+-
+-@pytest.fixture
+-def httpsbin_url(httpbin_secure):
++@pytest.fixture(name='httpsbin_url')
++def _httpsbin_url(httpbin_secure):
+     # Issue #1483: Make sure the URL always has a trailing slash
+     httpbin_url = httpbin_secure.url.rstrip('/') + '/'
+ 
+@@ -69,7 +68,6 @@ def httpsbin_url(httpbin_secure):
+ 
+     return inner
+ 
+-
+ # Requests to this URL should always fail with a connection timeout (nothing
+ # listening on that port)
+ TARPIT = "http://10.255.255.1"

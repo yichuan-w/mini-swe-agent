@@ -1,0 +1,12 @@
+{
+  "info": {
+    "submission": "diff --git a/tests/roots/test-linkcheck/links.txt b/tests/roots/test-linkcheck/links.txt\nindex 4ff0c9f52..df18b10f6 100644\n--- a/tests/roots/test-linkcheck/links.txt\n+++ b/tests/roots/test-linkcheck/links.txt\n@@ -1,19 +1 @@\n-This is from CPython documentation.\n-\n-* Also, if there is a `default namespace <https://www.w3.org/TR/2006/REC-xml-names-20060816/#defaulting>`__, that full URI gets prepended to all of the non-prefixed tags.\n-\n-* The URL having anchor: `https://www.sphinx-doc.org/en/master/usage/installation.html#overview`_\n-\n-Some additional anchors to exercise ignore code\n-\n-* `Example Bar invalid <https://www.google.com/#!bar>`_\n-* `Example Bar invalid <https://www.google.com#!bar>`_ tests that default ignore anchor of #! does not need to be prefixed with /\n-* `Example Bar invalid <https://www.google.com/#top>`_\n-* `Example anchor invalid <http://www.sphinx-doc.org/en/master/index.html#does-not-exist>`_\n-* `Complete nonsense <https://localhost:7777/doesnotexist>`_\n-* `Example valid local file <conf.py>`_\n-* `Example invalid local file <path/to/notfound>`_\n-* https://github.com/sphinx-doc/sphinx/blob/4.x/sphinx/__init__.py#L2\n-\n-.. image:: https://www.google.com/image.png\n-.. figure:: https://www.google.com/image2.png\n+This is from CPython documentation.\\n\\n* Also, if there is a `default namespace <https://www.w3.org/TR/2006/REC-xml-names-20060816/#defaulting>`__, that full URI gets prepended to all of the non-prefixed tags.\\n\\n* The URL having anchor: `https://www.sphinx-doc.org/en/master/usage/installation.html#overview`_\\n\\nSome additional anchors to exercise ignore code\\n\\n* `Example Bar invalid <https://www.google.com/#!bar>`_\\n* `Example Bar invalid <https://www.google.com#!bar>`_ tests that default ignore anchor of #! does not need to be prefixed with /\\n* `Example Bar invalid <https://www.google.com/#top>`_\\n* `Example anchor invalid <http://www.sphinx-doc.org/en/master/index.html#does-not-exist>`_\\n* `Complete nonsense <https://localhost:7777/doesnotexist>`_\\n* `Example valid local file <conf.py>`_\\n* `Example invalid local file <path/to/notfound>`_\\n\\n.. image:: https://www.google.com/image.png\\n.. figure:: https://www.google.com/image2.png\\n\n\\ No newline at end of file\n",
+    "config": {
+      "agent": "swe-agent",
+      "model": "gpt-5-mini"
+    }
+  },
+  "messages": [],
+  "trajectory_format": "mini-swe-agent-1",
+  "instance_id": "sphinx-doc__sphinx-9658"
+}

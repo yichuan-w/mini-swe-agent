@@ -1,0 +1,12 @@
+{
+  "info": {
+    "submission": "diff --git a/django/forms/widgets.py b/django/forms/widgets.py\nindex 40ac1d3162..3784f6b24d 100644\n--- a/django/forms/widgets.py\n+++ b/django/forms/widgets.py\n@@ -659,6 +659,13 @@ class ChoiceWidget(Widget):\n \n     def format_value(self, value):\n         \"\"\"Return selected values as a list.\"\"\"\n+        # For radio widgets used with required fields, don't select the blank\n+        # option by default when no value is provided. Select widgets (<select>)\n+        # still present a blank option for required fields, but radio inputs\n+        # have an inherent unfilled state and should render with no checked\n+        # option in this case.\n+        if value is None and not self.allow_multiple_selected and getattr(self, 'input_type', None) == 'radio' and getattr(self, 'is_required', False):\n+            return []\n         if value is None and self.allow_multiple_selected:\n             return []\n         if not isinstance(value, (tuple, list)):\n",
+    "config": {
+      "agent": "swe-agent",
+      "model": "gpt-5-mini"
+    }
+  },
+  "messages": [],
+  "trajectory_format": "mini-swe-agent-1",
+  "instance_id": "django__django-12406"
+}

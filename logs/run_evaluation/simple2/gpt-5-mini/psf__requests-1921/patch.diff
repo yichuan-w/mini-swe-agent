@@ -1,0 +1,37 @@
+diff --git a/requests/models.py b/requests/models.py
+index cd232e6..4a00d21 100644
+--- a/requests/models.py
++++ b/requests/models.py
+@@ -391,10 +391,12 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
+         """Prepares the given HTTP headers."""
+ 
+         if headers:
+-            self.headers = CaseInsensitiveDict((to_native_string(name), value) for name, value in headers.items())
++            # Filter out headers with a None value so they are not sent as the string 'None'.
++            self.headers = CaseInsensitiveDict((to_native_string(name), value)
++                                               for name, value in headers.items()
++                                               if value is not None)
+         else:
+             self.headers = CaseInsensitiveDict()
+-
+     def prepare_body(self, data, files):
+         """Prepares the given HTTP body data."""
+ 
+diff --git a/test_requests.py b/test_requests.py
+index 3d7cdaa..c6e36f5 100755
+--- a/test_requests.py
++++ b/test_requests.py
+@@ -384,8 +384,11 @@ class RequestsTestCase(unittest.TestCase):
+     def test_conflicting_post_params(self):
+         url = httpbin('post')
+         with open('requirements.txt') as f:
+-            pytest.raises(ValueError, "requests.post(url, data='[{\"some\": \"data\"}]', files={'some': f})")
+-            pytest.raises(ValueError, "requests.post(url, data=u'[{\"some\": \"data\"}]', files={'some': f})")
++            with pytest.raises(ValueError):
++                requests.post(url, data='[{"some": "data"}]', files={'some': f})
++            with pytest.raises(ValueError):
++                requests.post(url, data=u'[{"some": "data"}]', files={'some': f})
++
+ 
+     def test_request_ok_set(self):
+         r = requests.get(httpbin('status', '404'))

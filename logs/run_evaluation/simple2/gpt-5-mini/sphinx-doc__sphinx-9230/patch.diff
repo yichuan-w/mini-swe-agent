@@ -1,0 +1,20 @@
+diff --git a/sphinx/ext/napoleon/docstring.py b/sphinx/ext/napoleon/docstring.py
+index d8cb75a5f..79477f813 100644
+--- a/sphinx/ext/napoleon/docstring.py
++++ b/sphinx/ext/napoleon/docstring.py
+@@ -268,6 +268,15 @@ class GoogleDocstring:
+             if match:
+                 _name = match.group(1).strip()
+                 _type = match.group(2)
++            else:
++                # Handle non-standard 'type name' ordering, e.g.:
++                #   dict(str, str) opc_meta: (optional)
++                # Accept a leading type followed by a name when the usual
++                # 'name(type)' pattern isn't present.
++                rev_match = re.match(r"\s*(?P<type>\S+\(.*\))\s+(?P<name>.+)", before)
++                if rev_match:
++                    _type = rev_match.group('type')
++                    _name = rev_match.group('name').strip()
+ 
+         _name = self._escape_args_and_kwargs(_name)
+ 

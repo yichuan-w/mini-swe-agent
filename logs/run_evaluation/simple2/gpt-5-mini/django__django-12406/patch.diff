@@ -1,0 +1,18 @@
+diff --git a/django/forms/widgets.py b/django/forms/widgets.py
+index 40ac1d3162..3784f6b24d 100644
+--- a/django/forms/widgets.py
++++ b/django/forms/widgets.py
+@@ -659,6 +659,13 @@ class ChoiceWidget(Widget):
+ 
+     def format_value(self, value):
+         """Return selected values as a list."""
++        # For radio widgets used with required fields, don't select the blank
++        # option by default when no value is provided. Select widgets (<select>)
++        # still present a blank option for required fields, but radio inputs
++        # have an inherent unfilled state and should render with no checked
++        # option in this case.
++        if value is None and not self.allow_multiple_selected and getattr(self, 'input_type', None) == 'radio' and getattr(self, 'is_required', False):
++            return []
+         if value is None and self.allow_multiple_selected:
+             return []
+         if not isinstance(value, (tuple, list)):

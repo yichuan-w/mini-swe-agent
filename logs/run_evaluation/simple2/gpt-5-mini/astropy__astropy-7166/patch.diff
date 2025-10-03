@@ -1,0 +1,62 @@
+diff --git a/astropy/utils/misc.py b/astropy/utils/misc.py
+index de3fb01d1..a460d7800 100644
+--- a/astropy/utils/misc.py
++++ b/astropy/utils/misc.py
+@@ -528,13 +528,45 @@ class InheritDocstrings(type):
+                 not key.startswith('_'))
+ 
+         for key, val in dct.items():
+-            if (inspect.isfunction(val) and
+-                is_public_member(key) and
+-                val.__doc__ is None):
++            if not is_public_member(key):
++                continue
++
++            # Determine the underlying function whose __doc__ we should set.
++            target_func = None
++            # Plain function defined in class body
++            if inspect.isfunction(val):
++                target_func = val
++            # classmethod or staticmethod
++            elif isinstance(val, (classmethod, staticmethod)):
++                target_func = val.__func__
++            # property: use the fget function
++            elif isinstance(val, property):
++                target_func = val.fget
++
++            if target_func is None:
++                continue
++
++            if target_func.__doc__ is None:
+                 for base in cls.__mro__[1:]:
+                     super_method = getattr(base, key, None)
+-                    if super_method is not None:
+-                        val.__doc__ = super_method.__doc__
++                    if super_method is None:
++                        continue
++
++                    # Extract docstring from the super-method depending on its type
++                    doc_to_copy = None
++                    if isinstance(super_method, property):
++                        doc_to_copy = getattr(super_method.fget, '__doc__', None)
++                    elif isinstance(super_method, (classmethod, staticmethod)):
++                        doc_to_copy = getattr(super_method.__func__, '__doc__', None)
++                    else:
++                        doc_to_copy = getattr(super_method, '__doc__', None)
++
++                    if doc_to_copy:
++                        try:
++                            target_func.__doc__ = doc_to_copy
++                        except Exception:
++                            # Some objects may not allow setting __doc__; ignore
++                            pass
+                         break
+ 
+         super().__init__(name, bases, dct)
+@@ -1126,4 +1158,4 @@ def dtype_bytes_or_chars(dtype):
+     """
+     match = re.search(r'(\d+)$', dtype.str)
+     out = int(match.group(1)) if match else None
+-    return out
++    return out
+\ No newline at end of file

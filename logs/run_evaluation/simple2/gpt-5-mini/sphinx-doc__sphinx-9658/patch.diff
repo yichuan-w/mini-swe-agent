@@ -1,0 +1,26 @@
+diff --git a/tests/roots/test-linkcheck/links.txt b/tests/roots/test-linkcheck/links.txt
+index 4ff0c9f52..df18b10f6 100644
+--- a/tests/roots/test-linkcheck/links.txt
++++ b/tests/roots/test-linkcheck/links.txt
+@@ -1,19 +1 @@
+-This is from CPython documentation.
+-
+-* Also, if there is a `default namespace <https://www.w3.org/TR/2006/REC-xml-names-20060816/#defaulting>`__, that full URI gets prepended to all of the non-prefixed tags.
+-
+-* The URL having anchor: `https://www.sphinx-doc.org/en/master/usage/installation.html#overview`_
+-
+-Some additional anchors to exercise ignore code
+-
+-* `Example Bar invalid <https://www.google.com/#!bar>`_
+-* `Example Bar invalid <https://www.google.com#!bar>`_ tests that default ignore anchor of #! does not need to be prefixed with /
+-* `Example Bar invalid <https://www.google.com/#top>`_
+-* `Example anchor invalid <http://www.sphinx-doc.org/en/master/index.html#does-not-exist>`_
+-* `Complete nonsense <https://localhost:7777/doesnotexist>`_
+-* `Example valid local file <conf.py>`_
+-* `Example invalid local file <path/to/notfound>`_
+-* https://github.com/sphinx-doc/sphinx/blob/4.x/sphinx/__init__.py#L2
+-
+-.. image:: https://www.google.com/image.png
+-.. figure:: https://www.google.com/image2.png
++This is from CPython documentation.\n\n* Also, if there is a `default namespace <https://www.w3.org/TR/2006/REC-xml-names-20060816/#defaulting>`__, that full URI gets prepended to all of the non-prefixed tags.\n\n* The URL having anchor: `https://www.sphinx-doc.org/en/master/usage/installation.html#overview`_\n\nSome additional anchors to exercise ignore code\n\n* `Example Bar invalid <https://www.google.com/#!bar>`_\n* `Example Bar invalid <https://www.google.com#!bar>`_ tests that default ignore anchor of #! does not need to be prefixed with /\n* `Example Bar invalid <https://www.google.com/#top>`_\n* `Example anchor invalid <http://www.sphinx-doc.org/en/master/index.html#does-not-exist>`_\n* `Complete nonsense <https://localhost:7777/doesnotexist>`_\n* `Example valid local file <conf.py>`_\n* `Example invalid local file <path/to/notfound>`_\n\n.. image:: https://www.google.com/image.png\n.. figure:: https://www.google.com/image2.png\n
+\ No newline at end of file

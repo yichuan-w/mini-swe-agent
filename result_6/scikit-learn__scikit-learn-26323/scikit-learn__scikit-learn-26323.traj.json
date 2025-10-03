@@ -1,0 +1,12 @@
+{
+  "info": {
+    "submission": "diff --git a/sklearn/compose/_column_transformer.py b/sklearn/compose/_column_transformer.py\nindex 4eddd12b1..e85b34531 100644\n--- a/sklearn/compose/_column_transformer.py\n+++ b/sklearn/compose/_column_transformer.py\n@@ -303,6 +303,13 @@ class ColumnTransformer(TransformerMixin, _BaseComposition):\n         for trans in transformers:\n             _safe_set_output(trans, transform=transform)\n \n+        # Also set output for the remainder estimator if it is an estimator\n+        # (i.e. not the strings 'passthrough' or 'drop'). We do this\n+        # explicitly because `self.remainder` may be provided at\n+        # construction and thus not be present in `self.transformers`.\n+        if not isinstance(self.remainder, str) and self.remainder not in {\"passthrough\", \"drop\"}:\n+            _safe_set_output(self.remainder, transform=transform)\n+\n         return self\n \n     def get_params(self, deep=True):\n",
+    "config": {
+      "agent": "swe-agent",
+      "model": "gpt-5-mini"
+    }
+  },
+  "messages": [],
+  "trajectory_format": "mini-swe-agent-1",
+  "instance_id": "scikit-learn__scikit-learn-26323"
+}

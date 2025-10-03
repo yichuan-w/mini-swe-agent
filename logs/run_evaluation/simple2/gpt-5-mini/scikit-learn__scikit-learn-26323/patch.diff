@@ -1,0 +1,18 @@
+diff --git a/sklearn/compose/_column_transformer.py b/sklearn/compose/_column_transformer.py
+index 4eddd12b1..e85b34531 100644
+--- a/sklearn/compose/_column_transformer.py
++++ b/sklearn/compose/_column_transformer.py
+@@ -303,6 +303,13 @@ class ColumnTransformer(TransformerMixin, _BaseComposition):
+         for trans in transformers:
+             _safe_set_output(trans, transform=transform)
+ 
++        # Also set output for the remainder estimator if it is an estimator
++        # (i.e. not the strings 'passthrough' or 'drop'). We do this
++        # explicitly because `self.remainder` may be provided at
++        # construction and thus not be present in `self.transformers`.
++        if not isinstance(self.remainder, str) and self.remainder not in {"passthrough", "drop"}:
++            _safe_set_output(self.remainder, transform=transform)
++
+         return self
+ 
+     def get_params(self, deep=True):

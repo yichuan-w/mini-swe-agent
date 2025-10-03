@@ -1,0 +1,29 @@
+diff --git a/django/utils/functional.py b/django/utils/functional.py
+index 6d38f932f9..e82b06f9d4 100644
+--- a/django/utils/functional.py
++++ b/django/utils/functional.py
+@@ -403,6 +403,24 @@ class SimpleLazyObject(LazyObject):
+         return copy.deepcopy(self._wrapped, memo)
+ 
+ 
++    def __conform__(self, protocol):
++        """
++        Support DB adapters' adaptation protocol by delegating to the
++        wrapped object. This allows database drivers (e.g. sqlite3)
++        to receive the underlying value instead of the SimpleLazyObject
++        proxy when binding parameters.
++        """
++        # Ensure the wrapped object is initialized.
++        if self._wrapped is empty:
++            self._setup()
++        wrapped = self._wrapped
++        # If the wrapped object implements __conform__, delegate to it.
++        if hasattr(wrapped, '__conform__'):
++            return wrapped.__conform__(protocol)
++        # Otherwise, return the wrapped object itself so adapters can
++        # attempt to adapt it.
++        return wrapped
++
+ def partition(predicate, values):
+     """
+     Split the values into two sets, based on the return value of the function

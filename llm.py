@@ -55,6 +55,7 @@ class OpenAIModel(LLM):
             try:
                 response = self._client.responses.create(
                     model=self.model_name,
+                    tools=[{ "type": "web_search_preview" }],
                     input=prompt,
                 )
                 # Try multiple extraction strategies depending on SDK version

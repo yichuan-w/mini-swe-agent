@@ -1,0 +1,12 @@
+{
+  "info": {
+    "submission": "diff --git a/django/db/migrations/writer.py b/django/db/migrations/writer.py\nindex a59f0c8dcb..7e14ebe427 100644\n--- a/django/db/migrations/writer.py\n+++ b/django/db/migrations/writer.py\n@@ -173,9 +173,11 @@ class MigrationWriter:\n         else:\n             imports.add(\"from django.db import migrations\")\n \n-        # Sort imports by the package / module to be imported (the part after\n-        # \"from\" in \"from ... import ...\" or after \"import\" in \"import ...\").\n-        sorted_imports = sorted(imports, key=lambda i: i.split()[1])\n+        # Place plain module imports before \"from ... import ...\" imports,\n+        # then sort within each group by module name.\n+        import_lines = sorted([i for i in imports if i.startswith(\"import \")], key=lambda i: i.split()[1])\n+        from_lines = sorted([i for i in imports if i.startswith(\"from \")], key=lambda i: i.split()[1])\n+        sorted_imports = import_lines + from_lines\n         items[\"imports\"] = \"\\n\".join(sorted_imports) + \"\\n\" if imports else \"\"\n         if migration_imports:\n             items[\"imports\"] += (\n",
+    "config": {
+      "agent": "swe-agent",
+      "model": "gpt-5-mini"
+    }
+  },
+  "messages": [],
+  "trajectory_format": "mini-swe-agent-1",
+  "instance_id": "django__django-16662"
+}

@@ -1,0 +1,12 @@
+{
+  "info": {
+    "submission": "diff --git a/sympy/geometry/point.py b/sympy/geometry/point.py\nindex 7c978c47be..2e8fb5091d 100644\n--- a/sympy/geometry/point.py\n+++ b/sympy/geometry/point.py\n@@ -213,6 +213,19 @@ def __add__(self, other):\n         sympy.geometry.point.Point.translate\n \n         \"\"\"\n+        # If 'other' is a Mul that contains a Point factor (e.g. 2*Point2D),\n+        # handle it by extracting the scalar and the Point and performing\n+        # the addition in a way consistent with Point + (k*Point).\n+        if getattr(other, 'is_Mul', False):\n+            for factor in other.args:\n+                if isinstance(factor, Point):\n+                    scalar = other/factor\n+                    try:\n+                        s, o = Point._normalize_dimension(self, Point(factor, evaluate=False))\n+                    except TypeError:\n+                        break\n+                    coords = [simplify(a + scalar*b) for a, b in zip(s, o)]\n+                    return Point(coords, evaluate=False)\n         try:\n             s, o = Point._normalize_dimension(self, Point(other, evaluate=False))\n         except TypeError:\n",
+    "config": {
+      "agent": "swe-agent",
+      "model": "gpt-5-mini"
+    }
+  },
+  "messages": [],
+  "trajectory_format": "mini-swe-agent-1",
+  "instance_id": "sympy__sympy-17655"
+}
