@@ -1,0 +1,57 @@
+diff --git a/astropy/utils/misc.py b/astropy/utils/misc.py
+index de3fb01d1..f45d43a83 100644
+--- a/astropy/utils/misc.py
++++ b/astropy/utils/misc.py
+@@ -527,16 +527,48 @@ class InheritDocstrings(type):
+                  and len(key) > 4) or
+                 not key.startswith('_'))
+ 
+-        for key, val in dct.items():
+-            if (inspect.isfunction(val) and
+-                is_public_member(key) and
+-                val.__doc__ is None):
++        for key, val in list(dct.items()):
++            if not is_public_member(key):
++                continue
++
++            # If the object in the class dict already has a docstring, skip.
++            if getattr(val, '__doc__', None) is not None:
++                continue
++
++            # Normal functions / methods
++            if inspect.isfunction(val):
+                 for base in cls.__mro__[1:]:
+                     super_method = getattr(base, key, None)
+                     if super_method is not None:
+                         val.__doc__ = super_method.__doc__
+                         break
+ 
++            # property descriptors: create a new property with copied docstring
++            elif isinstance(val, property):
++                for base in cls.__mro__[1:]:
++                    super_attr = getattr(base, key, None)
++                    if super_attr is not None:
++                        doc = getattr(super_attr, '__doc__', None)
++                        if doc:
++                            dct[key] = property(val.fget, val.fset, val.fdel, doc)
++                        break
++
++            # classmethod / staticmethod: copy docstring onto the underlying function
++            elif isinstance(val, (classmethod, staticmethod)):
++                func = getattr(val, '__func__', None)
++                if func is None:
++                    continue
++                for base in cls.__mro__[1:]:
++                    super_attr = getattr(base, key, None)
++                    if super_attr is not None:
++                        doc = getattr(super_attr, '__doc__', None)
++                        if doc:
++                            func.__doc__ = doc
++                            if isinstance(val, classmethod):
++                                dct[key] = classmethod(func)
++                            else:
++                                dct[key] = staticmethod(func)
++                        break
+         super().__init__(name, bases, dct)
+ 
+ 

@@ -1,0 +1,71 @@
+2025-10-03 22:30:52,836 - INFO - Creating container for django__django-16631...
+2025-10-03 22:30:52,882 - INFO - Container for django__django-16631 created: 1506ae4962fb3c7491fb88440e64ca20684fbf4005985a5443222ea9eeb34c94
+2025-10-03 22:30:53,036 - INFO - Container for django__django-16631 started: 1506ae4962fb3c7491fb88440e64ca20684fbf4005985a5443222ea9eeb34c94
+2025-10-03 22:30:53,037 - INFO - Intermediate patch for django__django-16631 written to logs/run_evaluation/simple3/gpt-5-mini/django__django-16631/patch.diff, now applying to container...
+2025-10-03 22:30:53,157 - INFO - >>>>> Applied Patch:
+Checking patch docs/ref/settings.txt...
+Applied patch docs/ref/settings.txt cleanly.
+
+2025-10-03 22:30:53,893 - INFO - Git diff before:
+diff --git a/docs/ref/settings.txt b/docs/ref/settings.txt
+index 41387886c0..cfe6240a0a 100644
+--- a/docs/ref/settings.txt
++++ b/docs/ref/settings.txt
+@@ -2301,10 +2301,18 @@ Default: ``[]``
+ A list of fallback secret keys for a particular Django installation. These are
+ used to allow rotation of the ``SECRET_KEY``.
+ 
+-In order to rotate your secret keys, set a new ``SECRET_KEY`` and move the
+-previous value to the beginning of ``SECRET_KEY_FALLBACKS``. Then remove the
+-old values from the end of the ``SECRET_KEY_FALLBACKS`` when you are ready to
+-expire the sessions, password reset tokens, and so on, that make use of them.
++In order to rotate your secret keys, set a new ``SECRET_KEY`` and add the
++previous key(s) to ``SECRET_KEY_FALLBACKS`` (newest first). Note that
++``SECRET_KEY_FALLBACKS`` is consulted by Django's signing framework
++(``django.core.signing`` and the cookie signer) and will allow previously
++signed values (for example, values produced by the signing API or the cookie
++signer) to be validated using any key in the list. Some code paths compute
++HMACs directly (for example, via ``salted_hmac``) and do not consult
++``SECRET_KEY_FALLBACKS`` unless fallback keys are explicitly passed. For
++example, ``AbstractBaseUser.get_session_auth_hash`` uses ``salted_hmac`` with
++the default secret and does not consult ``SECRET_KEY_FALLBACKS``. After an
++appropriate overlap period (to allow existing signed values to expire),
++remove old keys from the end of ``SECRET_KEY_FALLBACKS``.
+ 
+ .. note::
+2025-10-03 22:30:53,894 - INFO - Eval script for django__django-16631 written to logs/run_evaluation/simple3/gpt-5-mini/django__django-16631/eval.sh; copying to container...
+2025-10-03 22:30:59,484 - INFO - Test runtime: 5.53 seconds
+2025-10-03 22:30:59,484 - INFO - Test output for django__django-16631 written to logs/run_evaluation/simple3/gpt-5-mini/django__django-16631/test_output.txt
+2025-10-03 22:30:59,559 - INFO - Git diff after:
+diff --git a/docs/ref/settings.txt b/docs/ref/settings.txt
+index 41387886c0..cfe6240a0a 100644
+--- a/docs/ref/settings.txt
++++ b/docs/ref/settings.txt
+@@ -2301,10 +2301,18 @@ Default: ``[]``
+ A list of fallback secret keys for a particular Django installation. These are
+ used to allow rotation of the ``SECRET_KEY``.
+ 
+-In order to rotate your secret keys, set a new ``SECRET_KEY`` and move the
+-previous value to the beginning of ``SECRET_KEY_FALLBACKS``. Then remove the
+-old values from the end of the ``SECRET_KEY_FALLBACKS`` when you are ready to
+-expire the sessions, password reset tokens, and so on, that make use of them.
++In order to rotate your secret keys, set a new ``SECRET_KEY`` and add the
++previous key(s) to ``SECRET_KEY_FALLBACKS`` (newest first). Note that
++``SECRET_KEY_FALLBACKS`` is consulted by Django's signing framework
++(``django.core.signing`` and the cookie signer) and will allow previously
++signed values (for example, values produced by the signing API or the cookie
++signer) to be validated using any key in the list. Some code paths compute
++HMACs directly (for example, via ``salted_hmac``) and do not consult
++``SECRET_KEY_FALLBACKS`` unless fallback keys are explicitly passed. For
++example, ``AbstractBaseUser.get_session_auth_hash`` uses ``salted_hmac`` with
++the default secret and does not consult ``SECRET_KEY_FALLBACKS``. After an
++appropriate overlap period (to allow existing signed values to expire),
++remove old keys from the end of ``SECRET_KEY_FALLBACKS``.
+ 
+ .. note::
+2025-10-03 22:30:59,559 - INFO - Grading answer for django__django-16631...
+2025-10-03 22:30:59,560 - INFO - report: {'django__django-16631': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['test_get_user_fallback_secret (auth_tests.test_basic.TestGetUser.test_get_user_fallback_secret)']}, 'PASS_TO_PASS': {'success': ['test_get_user (auth_tests.test_basic.TestGetUser.test_get_user)', 'test_get_user_anonymous (auth_tests.test_basic.TestGetUser.test_get_user_anonymous)', 'The current user model can be retrieved', 'Check the creation and properties of a superuser', 'test_superuser_no_email_or_password (auth_tests.test_basic.BasicTestCase.test_superuser_no_email_or_password)', 'The current user model can be swapped out for another', 'The alternate user setting must point to something in the format app.model', 'The current user model must point to an installed model', 'test_unicode_username (auth_tests.test_basic.BasicTestCase.test_unicode_username)', 'Users can be created and can set their password', 'Users can be created without an email', 'Default User model verbose names are translatable (#19945)'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for django__django-16631: resolved: False
+2025-10-03 22:30:59,561 - INFO - Attempting to stop container sweb.eval.django__django-16631.simple3...
+2025-10-03 22:31:14,766 - INFO - Attempting to remove container sweb.eval.django__django-16631.simple3...
+2025-10-03 22:31:14,787 - INFO - Container sweb.eval.django__django-16631.simple3 removed.

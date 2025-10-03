@@ -1,0 +1,27 @@
+diff --git a/conftest.py b/conftest.py
+new file mode 100644
+index 0000000000..c56e4ebc25
+--- /dev/null
++++ b/conftest.py
+@@ -0,0 +1,3 @@
++import os
++# Ensure Django test settings are used when running pytest
++os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'test_sqlite')
+diff --git a/django/views/generic/base.py b/django/views/generic/base.py
+index ea5baca08d..e12af8587e 100644
+--- a/django/views/generic/base.py
++++ b/django/views/generic/base.py
+@@ -27,6 +27,13 @@ class ContextMixin:
+         kwargs.setdefault('view', self)
+         if self.extra_context is not None:
+             kwargs.update(self.extra_context)
++        # Resolve SimpleLazyObject URL kwargs produced by
++        # _wrap_url_kwargs_with_deprecation_warning() so they are
++        # usable for lookups (e.g. ORM filters). URL kwargs are
++        # expected to be strings, so coerce lazy values to str.
++        for key, value in list(kwargs.items()):
++            if isinstance(value, SimpleLazyObject):
++                kwargs[key] = str(value)
+         return kwargs
+ 
+ 

@@ -6,3 +6,4 @@ datasets>=2.0.0
 rich>=13.0.0
 mini-swe-agent
 swebench
+leann

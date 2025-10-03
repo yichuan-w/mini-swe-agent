@@ -45,11 +45,22 @@ def process_instance(
     try:
         # Initialize the environment
         env = SWEEnvironment(instance)
+        # Pre-install and build leann index before the agent starts (best-effort)
+        try:
+            print("[SETUP] Installing leann inside sandbox...")
+            env.leann_install()
+        except Exception as e:
+            print(f"[SETUP] leann install failed (continuing): {e}")
+        try:
+            print("[SETUP] Building leann index 'code-base-index'...")
+            env.leann_build_index("code-base-index", "**/*.py")
+        except Exception as e:
+            print(f"[SETUP] leann build failed (continuing): {e}")
+
         # Initialize the agent
         agent = ReactAgent("swe-agent", parser, llm)
-        # Register environment tools
-        agent.add_functions([env.run_bash_cmd])
-        # agent.add_functions([env.run_bash_cmd, env.replace_in_file, env.show_file])
+        # Register only core bash tool and leann_search to increase its call probability
+        agent.add_functions([env.run_bash_cmd, env.leann_search])
         # Provide env reference so the agent can query staged changes before finishing
         agent.env = env  # type: ignore[attr-defined]
         # Run the agent

@@ -1,0 +1,33 @@
+diff --git a/django/core/servers/basehttp.py b/django/core/servers/basehttp.py
+index 14dab517c9..2ab8ae7f81 100644
+--- a/django/core/servers/basehttp.py
++++ b/django/core/servers/basehttp.py
+@@ -17,6 +17,7 @@ from django.core.exceptions import ImproperlyConfigured
+ from django.core.handlers.wsgi import LimitedStream
+ from django.core.wsgi import get_wsgi_application
+ from django.utils.module_loading import import_string
++from django.db import connections
+ 
+ __all__ = ('WSGIServer', 'WSGIRequestHandler')
+ 
+@@ -117,6 +118,20 @@ class ServerHandler(simple_server.ServerHandler):
+         self.get_stdin()._read_limited()
+         super().close()
+ 
++    def run(self, *args, **kwargs):
++        """Run the WSGI application and ensure DB connections are closed.
++
++        Closing DB connections here prevents connections from leaking across
++        threaded request handlers which can interfere with test teardown.
++        """
++        try:
++            return super().run(*args, **kwargs)
++        finally:
++            try:
++                connections.close_all()
++            except Exception:
++                pass
++
+ 
+ class WSGIRequestHandler(simple_server.WSGIRequestHandler):
+     protocol_version = 'HTTP/1.1'

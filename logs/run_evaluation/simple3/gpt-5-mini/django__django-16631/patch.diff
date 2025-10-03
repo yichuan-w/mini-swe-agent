@@ -1,0 +1,27 @@
+diff --git a/docs/ref/settings.txt b/docs/ref/settings.txt
+index 41387886c0..cfe6240a0a 100644
+--- a/docs/ref/settings.txt
++++ b/docs/ref/settings.txt
+@@ -2301,10 +2301,18 @@ Default: ``[]``
+ A list of fallback secret keys for a particular Django installation. These are
+ used to allow rotation of the ``SECRET_KEY``.
+ 
+-In order to rotate your secret keys, set a new ``SECRET_KEY`` and move the
+-previous value to the beginning of ``SECRET_KEY_FALLBACKS``. Then remove the
+-old values from the end of the ``SECRET_KEY_FALLBACKS`` when you are ready to
+-expire the sessions, password reset tokens, and so on, that make use of them.
++In order to rotate your secret keys, set a new ``SECRET_KEY`` and add the
++previous key(s) to ``SECRET_KEY_FALLBACKS`` (newest first). Note that
++``SECRET_KEY_FALLBACKS`` is consulted by Django's signing framework
++(``django.core.signing`` and the cookie signer) and will allow previously
++signed values (for example, values produced by the signing API or the cookie
++signer) to be validated using any key in the list. Some code paths compute
++HMACs directly (for example, via ``salted_hmac``) and do not consult
++``SECRET_KEY_FALLBACKS`` unless fallback keys are explicitly passed. For
++example, ``AbstractBaseUser.get_session_auth_hash`` uses ``salted_hmac`` with
++the default secret and does not consult ``SECRET_KEY_FALLBACKS``. After an
++appropriate overlap period (to allow existing signed values to expire),
++remove old keys from the end of ``SECRET_KEY_FALLBACKS``.
+ 
+ .. note::
+ 

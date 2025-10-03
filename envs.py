@@ -124,6 +124,36 @@ class SWEEnvironment:
             return bool(txt.strip())
         except Exception:
             return False
+
+    # -------------------- Optional: Leann code search helpers --------------------
+    def leann_install(self) -> str:
+        """Install leann (and dependencies) inside the sandbox."""
+        try:
+            return self._to_text(self.env.execute("python -m pip install -q leann"))
+        except Exception as e:
+            raise ValueError(str(e))
+
+    def leann_build_index(self, index_name: str = "code-base-index", docs_glob: str = "**/*.py") -> str:
+        """Build a leann index over code files using sentence-transformers + hnsw backend."""
+        try:
+            cmd = (
+                "leann build " + index_name +
+                " --docs $(git ls-files)" +
+                " --embedding-mode sentence-transformers"
+                " --embedding-model all-MiniLM-L6-v2"
+                " --backend hnsw --force --no-recompute"
+            )
+            return self._to_text(self.env.execute(cmd))
+        except Exception as e:
+            raise ValueError(str(e))
+
+    def leann_search(self, index_name: str, query: str, k: int = 5) -> str:
+        """Search the leann index for semantic matches to a query."""
+        try:
+            cmd = f"leann search {index_name} \"{query}\" --k {k}"
+            return self._to_text(self.env.execute(cmd))
+        except Exception as e:
+            raise ValueError(str(e))
     def replace_in_file(self, file_path: str, from_line: int, to_line: int, content: str) -> str:
         """
         [Optional] Replace the content of the file from the given line to the given line with the given content
