@@ -101,7 +101,7 @@ def main(
     instances = list(load_dataset(dataset_path, split=split))
     print(f"Loaded dataset {dataset_path}, split {split}...")
     print(f"Running on {len(instances)} instances...")
-    # instances = [instances[7]]
+    instances = [instances[13]]
     print(f"Running on {len(instances)} instances...")
     # print(f"Instances: {instances}")
 

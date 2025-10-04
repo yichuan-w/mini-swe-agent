@@ -25,7 +25,7 @@ def get_sb_environment(instance: dict) -> Environment:
     env_config = {
         "image": get_swebench_docker_image_name(instance),
         "cwd": "/testbed",
-        "timeout": 60,
+        "timeout": 300,
         "env": {
             "PAGER": "cat",
             "MANPAGER": "cat",
